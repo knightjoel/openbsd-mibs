@@ -687,14 +687,14 @@ pfi_get(struct pfr_buffer *b, const char *filter, int flags)
 	bzero(b, sizeof(struct pfr_buffer));
 	for (;;) {
 		pfr_buf_grow(b, b->pfrb_size);
-        b->pfrb_size = b->pfrb_msize;
-        if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size), flags)) {
-		ERROR_MSG("pfi_get_ifaces() failed");
-		return (1);
-        }
-        if (b->pfrb_size <= b->pfrb_msize)
-		break;
-    }
+		b->pfrb_size = b->pfrb_msize;
+		if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size), flags)) {
+			ERROR_MSG("pfi_get_ifaces() failed");
+			return (1);
+		}
+		if (b->pfrb_size <= b->pfrb_msize)
+			break;
+	}
 
 	return (0);
 }
