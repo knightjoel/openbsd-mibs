@@ -18,10 +18,10 @@
 #define SHORT                 8
 #define NORMALIZE             9
 #define MEMORY                10
-#define COUNT                 11
-#define SEARCHES              12
-#define INSERTS               13
-#define REMOVALS              14
+#define STATES_COUNT          11
+#define STATES_SEARCHES       12
+#define STATES_INSERTS        13
+#define STATES_REMOVALS       14
 #define NAME                  15
 #define IPBYTESIN             16
 #define IPBYTESOUT            17

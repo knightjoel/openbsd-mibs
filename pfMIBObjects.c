@@ -42,10 +42,10 @@ struct variable4 OpenBSD_variables[] = {
   { SHORT               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,4 } },
   { NORMALIZE           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,5 } },
   { MEMORY              , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,6 } },
-  { COUNT               , ASN_UNSIGNED  , RONLY , var_OpenBSD, 3, { 1,3,1 } },
-  { SEARCHES            , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,2 } },
-  { INSERTS             , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,3 } },
-  { REMOVALS            , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,4 } },
+  { STATES_COUNT        , ASN_UNSIGNED  , RONLY , var_OpenBSD, 3, { 1,3,1 } },
+  { STATES_SEARCHES     , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,2 } },
+  { STATES_INSERTS      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,3 } },
+  { STATES_REMOVALS     , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,4 } },
   { NAME                , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,4,1 } },
   { IPBYTESIN           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,2 } },
   { IPBYTESOUT          , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,3 } },
@@ -152,23 +152,23 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
-		case COUNT:
+		case STATES_COUNT:
 			ulong_ret = (long) s.states;
 			return (unsigned char *) &ulong_ret;
 
-		case SEARCHES:
+		case STATES_SEARCHES:
 			c64.high = s.fcounters[FCNT_STATE_SEARCH] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_SEARCH] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
-		case INSERTS:
+		case STATES_INSERTS:
 			c64.high = s.fcounters[FCNT_STATE_INSERT] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_INSERT] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
-		case REMOVALS:
+		case STATES_REMOVALS:
 			c64.high = s.fcounters[FCNT_STATE_REMOVALS] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_REMOVALS] & 0xffffffff;
 			*var_len = sizeof(c64);
