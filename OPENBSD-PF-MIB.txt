@@ -1,3 +1,7 @@
+--
+-- $jwk$
+--
+
 OPENBSD-PF-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
