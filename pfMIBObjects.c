@@ -106,7 +106,7 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 	static u_long ulong_ret;
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
-			== MATCH_FAILED )
+			== MATCH_FAILED)
 		return NULL;
 
 	if (dev == -1)
@@ -116,37 +116,27 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 
 		case LIMIT_STATES:
 			pl.index = PF_LIMIT_STATES;
-			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
-				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
-				return NULL;
-			}
-			ulong_ret = pl.limit;
-			return (unsigned char *) &ulong_ret;
+			break;
 
 		case LIMIT_SRC_NODES:
 			pl.index = PF_LIMIT_SRC_NODES;
-			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
-				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
-				return NULL;
-			}
-			ulong_ret = pl.limit;
-			return (unsigned char *) &ulong_ret;
-
+			break;
+			
 		case LIMIT_FRAGS:
 			pl.index = PF_LIMIT_FRAGS;
-			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
-				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
-				return NULL;
-			}
-			ulong_ret = pl.limit;
-			return (unsigned char *) &ulong_ret;
+			break;
 						
 		default:
 			ERROR_MSG("");
-
+			return NULL;
 	}
 
-	return NULL;
+	if (ioctl(dev, DIOCGETLIMIT, &pl)) {
+		ERROR_MSG("ioctl error doing DIOCGETLIMIT");
+		return NULL;
+	}
+	ulong_ret = pl.limit;
+	return (unsigned char *) &ulong_ret;
 }
 
 unsigned char *
