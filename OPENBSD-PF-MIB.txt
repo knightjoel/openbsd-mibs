@@ -34,7 +34,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "0410110000Z"
+    LAST-UPDATED "0410170000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -742,7 +742,7 @@ ifOut6BlockBytes OBJECT-TYPE
 
 
 -- tables
-tableNumber  OBJECT-TYPE
+tblNumber  OBJECT-TYPE
 	SYNTAX      Integer32
 	MAX-ACCESS  read-only
 	STATUS      current
@@ -750,8 +750,8 @@ tableNumber  OBJECT-TYPE
 	"The number of tables present on this system."
 	::= { tables 1 }
 
-tableTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF tableEntry
+tblTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF tblEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
@@ -759,129 +759,129 @@ tableTable OBJECT-TYPE
 	given by the value of tableNumber."
 	::= { tables 128 }
 
-tableEntry OBJECT-TYPE
-	SYNTAX      TableEntry
+tblEntry OBJECT-TYPE
+	SYNTAX      TblEntry
 	MAX-ACCESS  not-accessible
 	STATUS      current
 	DESCRIPTION
 	"An entry containing management information applicable to a
 	particular table."
-	INDEX   { tableIndex }
-	::= { tableTable 1 }
+	INDEX   { tblIndex }
+	::= { tblTable 1 }
 
-tableEntry ::=
+TblEntry ::=
 	SEQUENCE {
-		tableIndex		Integer32,
-		tableName		OCTET STRING,
-		tableAddresses		Integer32,
-		tableAnchorRefs		Integer32,
-		tableRuleRefs		Integer32,
-		tableEvalsMatch		Counter64,
-		tableEvalsNoMatch	Counter64,
-		tableInPassPkts		Counter64,
-		tableInPassBytes	Counter64,
-		tableInBlockPkts	Counter64,
-		tableInBlockBytes	Counter64,
-		tableInXPassPkts	Counter64,
-		tableInXPassBytes	Counter64,
-		tableOutPassPkts	Counter64,
-		tableOutPassBytes	Counter64,
-		tableOutBlockPkts	Counter64,
-		tableOutBlockBytes	Counter64,
-		tableOutXPassPkts	Counter64,
-		tableOutXPassBytes	Counter64,
-		tableStatsCleared	Unsigned32,
+		tblIndex		Integer32,
+		tblName			OCTET STRING,
+		tblAddresses		Integer32,
+		tblAnchorRefs		Integer32,
+		tblRuleRefs		Integer32,
+		tblEvalsMatch		Counter64,
+		tblEvalsNoMatch		Counter64,
+		tblInPassPkts		Counter64,
+		tblInPassBytes		Counter64,
+		tblInBlockPkts		Counter64,
+		tblInBlockBytes		Counter64,
+		tblInXPassPkts		Counter64,
+		tblInXPassBytes		Counter64,
+		tblOutPassPkts		Counter64,
+		tblOutPassBytes		Counter64,
+		tblOutBlockPkts		Counter64,
+		tblOutBlockBytes	Counter64,
+		tblOutXPassPkts		Counter64,
+		tblOutXPassBytes	Counter64,
+		tblStatsCleared		Unsigned32,
 	}
 
-tableIndex OBJECT-TYPE
+tblIndex OBJECT-TYPE
 	SYNTAX		Integer32 (1..2147483647)
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"A unique value, greater than zero, for each table."
-	::= { tableEntry 1 }
+	::= { tblEntry 1 }
 
-tableName OBJECT-TYPE
+tblName OBJECT-TYPE
 	SYNTAX		OCTET STRING
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The name of the table."
-	::= { tableEntry 2 }
+	::= { tblEntry 2 }
 
-tableAddresses OBJECT-TYPE
+tblAddresses OBJECT-TYPE
 	SYNTAX		Integer32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of addresses currently stored in the table."
-	::= { tableEntry 3 }
+	::= { tblEntry 3 }
 
-tableAnchorRefs OBJECT-TYPE
+tblAnchorRefs OBJECT-TYPE
 	SYNTAX		Integer32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of anchors which reference the table."
-	::= { tableEntry 4 }
+	::= { tblEntry 4 }
 
-tableRuleRefs OBJECT-TYPE
+tblRuleRefs OBJECT-TYPE
 	SYNTAX		Integer32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of rules which reference the table."
-	::= { tableEntry 5 }
+	::= { tblEntry 5 }
 
-tableEvalsMatch OBJECT-TYPE
+tblEvalsMatch OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of table evaluations that produced a match."
-	::= { tableEntry 6 }
+	::= { tblEntry 6 }
 
-tableEvalsNoMatch OBJECT-TYPE
+tblEvalsNoMatch OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of table evaluations that didn't match."
-	::= { tableEntry 7 }
+	::= { tblEntry 7 }
 
-tableInPassPkts OBJECT-TYPE
+tblInPassPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of packets passed in that matched the table."
-	::= { tableEntry 8 }
+	::= { tblEntry 8 }
 
-tableInPassBytes OBJECT-TYPE
+tblInPassBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of bytes passed in that matched the table."
-	::= { tableEntry 9 }
+	::= { tblEntry 9 }
 
-tableInBlockPkts OBJECT-TYPE
+tblInBlockPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of incoming packets blocked that matched the table."
-	::= { tableEntry 10 }
+	::= { tblEntry 10 }
 
-tableInBlockBytes OBJECT-TYPE
+tblInBlockBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number incoming bytes blocked that matched the table."
-	::= { tableEntry 11 }
+	::= { tblEntry 11 }
 
-tableInXPassPkts OBJECT-TYPE
+tblInXPassPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -889,9 +889,9 @@ tableInXPassPkts OBJECT-TYPE
 	"The number of packets statefully passed in where the state
 	entry refers to the table, but the table no longer contains
 	the address in question."
-	::= { tableEntry 12 }
+	::= { tblEntry 12 }
 
-tableInXPassBytes OBJECT-TYPE
+tblInXPassBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -899,41 +899,41 @@ tableInXPassBytes OBJECT-TYPE
 	"The number of bytes statefully passed in where the state
 	entry refers to the table, but the table no longer contains
 	the address in question."
-	::= { tableEntry 13 }
+	::= { tblEntry 13 }
 
-tableOutPassPkts OBJECT-TYPE
+tblOutPassPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of packets passed out that matched the table."
-	::= { tableEntry 14 }
+	::= { tblEntry 14 }
 
-tableOutPassBytes OBJECT-TYPE
+tblOutPassBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of bytes passed out that matched the table."
-	::= { tableEntry 15 }
+	::= { tblEntry 15 }
 
-tableOutBlockPkts OBJECT-TYPE
+tblOutBlockPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number of outgoing packets blocked that matched the table."
-	::= { tableEntry 16 }
+	::= { tblEntry 16 }
 
-tableOutBlockBytes OBJECT-TYPE
+tblOutBlockBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"The number outgoing bytes blocked that matched the table."
-	::= { tableEntry 17 }
+	::= { tblEntry 17 }
 
-tableOutXPassPkts OBJECT-TYPE
+tblOutXPassPkts OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -941,9 +941,9 @@ tableOutXPassPkts OBJECT-TYPE
 	"The number of packets statefully passed out where the state
 	entry refers to the table, but the table no longer contains
 	the address in question."
-	::= { tableEntry 18 }
+	::= { tblEntry 18 }
 
-tableOutXPassBytes OBJECT-TYPE
+tblOutXPassBytes OBJECT-TYPE
 	SYNTAX		Counter64
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -951,7 +951,7 @@ tableOutXPassBytes OBJECT-TYPE
 	"The number of bytes statefully passed out where the state
 	entry refers to the table, but the table no longer contains
 	the address in question."
-	::= { tableEntry 19 }
+	::= { tblEntry 19 }
 
 tblAddrTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF tblAddrEntry
@@ -969,12 +969,12 @@ tblAddrEntry OBJECT-TYPE
 	DESCRIPTION
 	"An entry containing management information applicable to a
 	particular table."
-	INDEX		{ tblAddrTableIndex, tblAddrNet, tblAddrMask }
+	INDEX		{ tblAddrTblIndex, tblAddrNet, tblAddrMask }
 	::= { tblAddrTable 1 }
 
 TblAddrEntry ::=
 	SEQUENCE {
-		tblAddrTableIndex	Integer32,
+		tblAddrTblIndex		Integer32,
 		tblAddrNet		IpAddress,
 		tblAddrMask		Integer32,
 		tblAddrCleared		TimeTicks,
@@ -988,7 +988,7 @@ TblAddrEntry ::=
 		tblAddrOutPassBytes	Counter64,
 	}
 
-tblAddrTableIndex OBJECT-TYPE
+tblAddrTblIndex OBJECT-TYPE
 	SYNTAX		Integer32 (1..2147483647)
 	MAX-ACCESS	read-only
 	STATUS		current
