@@ -86,7 +86,6 @@ struct variable2 pfMIBObjects_variables[] = {
   { TM_ADAPT_END        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,18 } },
   { TM_SRC_TRACK        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,19 } },
 };
-/*    (L = length of the oidsuffix) */
 
 
 void init_pfMIBObjects(void) {
@@ -143,7 +142,7 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 
 unsigned char *
 var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
-		size_t  *var_len, WriteMethod **write_method)
+		size_t *var_len, WriteMethod **write_method)
 {
 	struct pf_status s;
 	time_t runtime;
@@ -345,7 +344,6 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 						
 		default:
 			ERROR_MSG("");
-
 	}
 
 	return NULL;
