@@ -151,7 +151,6 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 	static long long_ret;
 	static u_long ulong_ret;
 	static unsigned char string[SPRINT_MAX_LEN];
-	static oid objid[MAX_OID_LEN];
 	static struct counter64 c64;
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
