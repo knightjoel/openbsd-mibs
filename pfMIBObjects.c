@@ -112,6 +112,8 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 	if (dev == -1)
 		return NULL;
 
+	memset(&pl, 0, sizeof(pl));
+
 	switch(vp->magic) {
 
 		case LIMIT_STATES:
@@ -159,6 +161,7 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 	if (dev == -1)
 		return NULL;
 
+	memset(&s, 0, sizeof(s));
 	if (ioctl(dev, DIOCGETSTATUS, &s)) {
 		ERROR_MSG("ioctl error doing DIOCGETSTATUS");
 		return NULL;
