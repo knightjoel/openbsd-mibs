@@ -799,7 +799,7 @@ TblEntry ::=
 		tblOutBlockBytes	Counter64,
 		tblOutXPassPkts		Counter64,
 		tblOutXPassBytes	Counter64,
-		tblStatsCleared		Unsigned32
+		tblStatsCleared		TimeTicks
 	}
 
 tblIndex OBJECT-TYPE
@@ -961,6 +961,16 @@ tblOutXPassBytes OBJECT-TYPE
 	entry refers to the table, but the table no longer contains
 	the address in question."
 	::= { tblEntry 19 }
+
+tblStatsCleared OBJECT-TYPE
+	SYNTAX		TimeTicks
+	UNITS		"1/100th of a Second"
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of seconds that have passed since the statistics
+	for this pf table were zeroed."
+	::= { tblEntry 20 }
 
 tblAddrTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF TblAddrEntry

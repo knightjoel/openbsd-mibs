@@ -154,6 +154,7 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_TAOUTBLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,17 } },
   { PF_TAOUTXPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,18 } },
   { PF_TAOUTXPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,19 } },
+  { PF_TASTATSCLEARED	, ASN_TIMETICKS	, RONLY , var_tables_table, 4, { 9,128,1,20 } },
   { PF_TADDRTABLEINDEX	, ASN_INTEGER	, RONLY , var_tbl_addr_table, 4, { 9,129,1,1 } },
   { PF_TADDRNET		, ASN_IPADDRESS	, RONLY , var_tbl_addr_table, 4, { 9,129,1,2 } },
   { PF_TADDRMASK	, ASN_INTEGER	, RONLY , var_tbl_addr_table, 4, { 9,129,1,3 } },
@@ -887,6 +888,11 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 			c64.high = ts->pfrts_bytes[OUT][PFR_OP_XPASS] >> 32;
 			c64.low = ts->pfrts_bytes[OUT][PFR_OP_XPASS] & 0xffffffff;
 			break;
+
+		case PF_TASTATSCLEARED:
+			ulong_ret = (long) (time(NULL) - ts->pfrts_tzero) * 100;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
 
 		default:
 			free(b.pfrb_caddr);
