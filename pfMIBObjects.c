@@ -43,11 +43,11 @@
 	    (var) != NULL;				\
 	    (var) = pfr_buf_next((buf), (var)))
 
-int	dev = -1;
-char *pfi_table[255][IFNAMSIZ];
-unsigned int pfi_count;
-unsigned int pft_count;
-time_t pfi_table_age;
+int		dev = -1;
+char 		*pfi_table[255][IFNAMSIZ];
+unsigned int	pfi_count;
+unsigned int	pft_count;
+time_t		pfi_table_age;
 
 size_t buf_esize[PFRB_MAX] = { 0,
 	sizeof(struct pfr_tstats), 
