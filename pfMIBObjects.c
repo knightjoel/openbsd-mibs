@@ -43,7 +43,7 @@
 	    (var) = pfr_buf_next((buf), (var)))
 
 int	dev = -1;
-char *pfi_table[255][255];
+char *pfi_table[255][IFNAMSIZ];
 unsigned int pfi_count;
 unsigned int pft_count;
 time_t pfi_table_age;
