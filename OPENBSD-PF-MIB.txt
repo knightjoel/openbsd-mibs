@@ -95,12 +95,11 @@ uptime OBJECT-TYPE
     ::= { info 2 }
 
 debug OBJECT-TYPE
-    SYNTAX      INTEGER (0..255)
+    SYNTAX      INTEGER { none(0), urgent(1), misc(2), noisey(3) }
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"Indicates the debug level that pf is running at. 0 = none; 1 =
-	urgent; 2 = misc; 3 = noisey."
+	"Indicates the debug level that pf is running at." 
     ::= { info 3 }
 
 hostid OBJECT-TYPE
