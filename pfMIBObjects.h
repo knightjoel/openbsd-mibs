@@ -124,6 +124,19 @@
 #define PF_TAOUTXPASSPKTS	168
 #define PF_TAOUTXPASSBYTES	169
 #define PF_TASTATSCLEARED	170
+#define PF_TADDRTABLEINDEX	171
+#define PF_TADDRNET		172
+#define PF_TADDRMASK		173
+#define PF_TADDRCLEARED		174
+#define PF_TADDRINBLOCKPKTS	175
+#define PF_TADDRINBLOCKBYTES	176
+#define PF_TADDRINPASSPKTS	177
+#define PF_TADDRINPASSBYTES	178
+#define PF_TADDROUTBLOCKPKTS	179
+#define PF_TADDROUTBLOCKBYTES	180
+#define PF_TADDROUTPASSPKTS	181
+#define PF_TADDROUTPASSBYTES	182
+
 
 #define PFI_IFTYPE_GROUP	0
 #define PFI_IFTYPE_INSTANCE	1
@@ -134,7 +147,7 @@ enum { IN, OUT };
 enum { IPV4, IPV6 };
 enum { PASS, BLOCK };
 
-enum { PFRB_TSTATS = 1, PFRB_IFACES, PFRB_MAX };
+enum { PFRB_TSTATS = 1, PFRB_ASTATS, PFRB_IFACES, PFRB_MAX };
 
 config_require(util_funcs)
 
@@ -143,6 +156,7 @@ FindVarMethod var_if_table;
 FindVarMethod var_limits;
 FindVarMethod var_pfMIBObjects;
 FindVarMethod var_tables_table;
+FindVarMethod var_tbl_addr_table;
 FindVarMethod var_timeouts;
 
 /* from pfctl */
@@ -170,6 +184,8 @@ unsigned char	*var_limits(struct variable *, oid *, size_t *, int,
 unsigned char	*var_table_number(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_tables_table(struct variable *, oid *, size_t *, int,
+	size_t *, WriteMethod **);
+unsigned char	*var_tbl_addr_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_timeouts(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);

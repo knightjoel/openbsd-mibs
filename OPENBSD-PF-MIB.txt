@@ -34,7 +34,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "0405290000Z"
+    LAST-UPDATED "0410110000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -952,6 +952,151 @@ tableOutXPassBytes OBJECT-TYPE
 	entry refers to the table, but the table no longer contains
 	the address in question."
 	::= { tableEntry 19 }
+
+tblAddrTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF tblAddrEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"A table containing the addresses/CIDR network blocks from 
+	every table on the system."
+	::= { tables 129 }
+
+tblAddrEntry OBJECT-TYPE
+	SYNTAX		TblAddrEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"An entry containing management information applicable to a
+	particular table."
+	INDEX		{ tblAddrTableIndex, tblAddrNet, tblAddrMask }
+	::= { tblAddrTable 1 }
+
+TblAddrEntry ::=
+	SEQUENCE {
+		tblAddrTableIndex	Integer32,
+		tblAddrNet		IpAddress,
+		tblAddrMask		Integer32,
+		tblAddrCleared		TimeTicks,
+		tblAddrInBlockPkts	Counter64,
+		tblAddrInBlockBytes	Counter64,
+		tblAddrInPassPkts	Counter64,
+		tblAddrInPassBytes	Counter64,
+		tblAddrOutBlockPkts	Counter64,
+		tblAddrOutBlockBytes	Counter64,
+		tblAddrOutPassPkts	Counter64,
+		tblAddrOutPassBytes	Counter64,
+	}
+
+tblAddrTableIndex OBJECT-TYPE
+	SYNTAX		Integer32 (1..2147483647)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The index value which uniquely identifies the table which
+	contains this tblAddrNet/tblAddrMask pair."
+	::= { tblAddrEntry 1 }
+
+tblAddrNet OBJECT-TYPE
+	SYNTAX		IpAddress
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The IP address portion of the CIDR network for this
+	particular table entry."
+	::= { tblAddrEntry 2 }
+
+tblAddrMask OBJECT-TYPE
+	SYNTAX		Integer32 (0..32)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The CIDR bitmask for this particular table entry."
+	::= { tblAddrEntry 3 }
+
+tblAddrCleared OBJECT-TYPE
+	SYNTAX		TimeTicks
+	UNITS      	"1/100th of a Second"
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The time that's passed since the statistics where last cleared, or
+	since the tblAddrNet/tblAddrMask pair was loaded into the table, 
+	whichever is sooner."
+	::= { tblAddrEntry 4 }
+
+tblAddrInBlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of inbound packets blocked as a result of matching
+	this table entry."
+	::= { tblAddrEntry 5 }
+
+tblAddrInBlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of inbound bytes blocked as a result of matching
+	this table entry."
+	::= { tblAddrEntry 6 }
+
+tblAddrInPassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of inbound packets passed as a result of matching
+	this table entry."
+	::= { tblAddrEntry 7 }
+
+tblAddrInPassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of inbound bytes passed as a result of matching
+	this table entry."
+	::= { tblAddrEntry 8 }
+
+tblAddrOutBlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outbound packets blocked as a result of matching
+	this table entry."
+	::= { tblAddrEntry 9 }
+
+tblAddrOutBlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outbound bytes blocked as a result of matching
+	this table entry."
+	::= { tblAddrEntry 10 }
+
+tblAddrOutPassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outbound packets passed as a result of matchin
+	this table entry."
+	::= { tblAddrEntry 11 }
+
+tblAddrOutPassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outbound bytes passed as a result of matchg
+	this table entry."
+	::= { tblAddrEntry 12 }
+
 
 
 -- END:  Don't forget this!

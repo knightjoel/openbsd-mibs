@@ -49,7 +49,9 @@ unsigned int pft_count;
 time_t pfi_table_age;
 
 size_t buf_esize[PFRB_MAX] = { 0,
-	sizeof(struct pfr_tstats), sizeof(struct pfi_if)
+	sizeof(struct pfr_tstats), 
+	sizeof(struct pfr_astats),
+	sizeof(struct pfi_if)
 };
 
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
@@ -151,6 +153,18 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_TAOUTBLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,17 } },
   { PF_TAOUTXPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,18 } },
   { PF_TAOUTXPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,19 } },
+  { PF_TADDRTABLEINDEX	, ASN_INTEGER	, RONLY , var_tbl_addr_table, 4, { 9,129,1,1 } },
+  { PF_TADDRNET		, ASN_IPADDRESS	, RONLY , var_tbl_addr_table, 4, { 9,129,1,2 } },
+  { PF_TADDRMASK	, ASN_INTEGER	, RONLY , var_tbl_addr_table, 4, { 9,129,1,3 } },
+  { PF_TADDRCLEARED	, ASN_TIMETICKS	, RONLY , var_tbl_addr_table, 4, { 9,129,1,4 } },
+  { PF_TADDRINBLOCKPKTS	, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,5 } },
+  { PF_TADDRINBLOCKBYTES, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,6 } },
+  { PF_TADDRINPASSPKTS	, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,7 } },
+  { PF_TADDRINPASSBYTES	, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,8 } },
+  { PF_TADDROUTBLOCKPKTS, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,9 } },
+  { PF_TADDROUTBLOCKBYTES,ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,10 } },
+  { PF_TADDROUTPASSPKTS , ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,11 } },
+  { PF_TADDROUTPASSBYTES, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,12 } },
 };
 
 
@@ -874,6 +888,173 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 	return (unsigned char *) &c64;
 }
 
+/* this function returns OIDs of the form
+ * 1.3.6.1.4.1.64512.1.9.129.1.X.A.B.B.B.B.C
+ * where
+ * X = oid from the request
+ * A = tableIndex
+ * B.B.B.B. = the network/host IP address
+ * C = the bitmask
+ * The tableIndex starts at offset 12 in the OID array
+ */
+unsigned char *
+var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfr_buffer bt, ba;
+	struct pfr_tstats *ts;
+	struct pfr_table filter;
+	struct pfr_astats *as;
+	int table_index = 1, result, break_flag = 0;
+	static oid cur_oid[MAX_OID_LEN]; 
+	oid *op;
+	u_char *cp;
+	static struct counter64 c64;
+	static u_long ulong_ret;
+
+	if (dev == -1)
+		return (NULL);
+
+	if (pft_get(&bt) || bt.pfrb_size == 0) {
+		ERROR_MSG("error getting table list: pft_get() failed");
+		return (NULL);
+	}
+
+	memcpy((char *)cur_oid, (char *)vp->name, (int)(vp->namelen) * sizeof(oid));
+
+	PFRB_FOREACH(ts, &bt) {
+		if (!(ts->pfrts_flags & PFR_TFLAG_ACTIVE))
+			continue;
+		bzero(&filter, sizeof(struct pfr_table));
+		if (strlcpy(filter.pfrt_name, ts->pfrts_t.pfrt_name, 
+				sizeof(filter.pfrt_name)) 
+				>= sizeof(filter.pfrt_name)) {
+			free(bt.pfrb_caddr);
+			free(ba.pfrb_caddr);
+			return (NULL);
+		}
+		if (pftable_addr_get(&ba, &filter) || ba.pfrb_size == 0) {
+			ERROR_MSG("error getting address list: pftable_addr_get() failed");
+			continue;
+		}
+		PFRB_FOREACH(as, &ba) {
+			if (as->pfras_a.pfra_af != AF_INET)
+				continue;
+			/* construct new oid */
+			op = cur_oid + 12;
+			*op++ = table_index;
+			cp = (u_char *)&(as->pfras_a.pfra_u);
+			*op++ = *cp++;
+			*op++ = *cp++;
+			*op++ = *cp++;
+			*op++ = *cp++;
+			*op++ = (u_char *)as->pfras_a.pfra_net;
+			result = snmp_oid_compare(name, *length, cur_oid, 18);
+			if ((exact && (result == 0)) || (!exact && (result < 0))) {
+				*length = 18;
+				for (result = 0; result < *length; result++)
+					name[result] = cur_oid[result];
+				break_flag++;
+				break;
+			}
+		}
+		if (break_flag)
+			break;
+		free(ba.pfrb_caddr);
+		table_index++;
+	}
+	free(bt.pfrb_caddr);
+
+	/* no match found */
+	if (break_flag == 0) 
+		return (NULL);
+
+	*var_len = sizeof(ulong_ret);
+
+	switch (vp->magic) {
+		case PF_TADDRTABLEINDEX:
+			ulong_ret = table_index;
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+			
+		case PF_TADDRNET:
+			cp = (u_char *)&as->pfras_a.pfra_u;
+			memcpy((char *)&ulong_ret, cp, 4);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+			
+		case PF_TADDRMASK:
+			ulong_ret = as->pfras_a.pfra_net;
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+			
+		case PF_TADDRCLEARED:
+			ulong_ret = (long) (time(NULL) - as->pfras_tzero) * 100;
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TADDRINBLOCKPKTS:
+			c64.high = as->pfras_packets[IN][PFR_OP_BLOCK] >> 32;
+			c64.low = as->pfras_packets[IN][PFR_OP_BLOCK] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDRINBLOCKBYTES:
+			c64.high = as->pfras_bytes[IN][PFR_OP_BLOCK] >> 32;
+			c64.low = as->pfras_bytes[IN][PFR_OP_BLOCK] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDRINPASSPKTS:
+			c64.high = as->pfras_packets[IN][PFR_OP_PASS] >> 32;
+			c64.low = as->pfras_packets[IN][PFR_OP_PASS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDRINPASSBYTES:
+			c64.high = as->pfras_bytes[IN][PFR_OP_PASS] >> 32;
+			c64.low = as->pfras_bytes[IN][PFR_OP_PASS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDROUTBLOCKPKTS:
+			c64.high = as->pfras_packets[OUT][PFR_OP_BLOCK] >> 32;
+			c64.low = as->pfras_packets[OUT][PFR_OP_BLOCK] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDROUTBLOCKBYTES:
+			c64.high = as->pfras_bytes[OUT][PFR_OP_BLOCK] >> 32;
+			c64.low = as->pfras_bytes[OUT][PFR_OP_BLOCK] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDROUTPASSPKTS:
+			c64.high = as->pfras_packets[OUT][PFR_OP_PASS] >> 32;
+			c64.low = as->pfras_packets[OUT][PFR_OP_PASS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+			
+		case PF_TADDROUTPASSBYTES:
+			c64.high = as->pfras_bytes[OUT][PFR_OP_PASS] >> 32;
+			c64.low = as->pfras_bytes[OUT][PFR_OP_PASS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			free(ba.pfrb_caddr);
+			return (unsigned char *) &c64;
+
+		default:
+			free(ba.pfrb_caddr);
+			return (NULL);
+	}
+}
+
 int
 pfi_get(struct pfr_buffer *b, const char *filter, int flags)
 {
@@ -913,6 +1094,26 @@ pft_get(struct pfr_buffer *b)
 			break;
 	}
 
+	return (0);
+}
+
+
+int
+pftable_addr_get(struct pfr_buffer *b, struct pfr_table *filter)
+{
+	bzero(b, sizeof(struct pfr_buffer));
+	b->pfrb_type = PFRB_ASTATS;
+
+	for (;;) {
+		pfr_buf_grow(b, b->pfrb_size);
+		b->pfrb_size = b->pfrb_msize;
+		if (pfr_get_astats(filter, b->pfrb_caddr, &(b->pfrb_size), 0)) {
+			return (1);
+		}
+		if (b->pfrb_size <= b->pfrb_msize)
+			break;
+	}
+	
 	return (0);
 }
 
@@ -995,6 +1196,28 @@ pfi_get_ifaces(const char *filter, struct pfi_if *buf, int *size, int flags)
 	}
 	*size = io.pfiio_size;
 
+	return (0);
+}
+
+int
+pfr_get_astats(struct pfr_table *tbl, struct pfr_astats *addr, int *size,
+		int flags)
+{
+	struct pfioc_table io;
+
+	if (tbl == NULL || size == NULL || *size < 0 ||
+	    (*size && addr == NULL)) 
+		return (-1);
+
+	bzero(&io, sizeof io);
+	io.pfrio_flags = flags;
+	io.pfrio_table = *tbl;
+	io.pfrio_buffer = addr;
+	io.pfrio_esize = sizeof(*addr);
+	io.pfrio_size = *size;
+	if (ioctl(dev, DIOCRGETASTATS, &io)) 
+		return (-1);
+	*size = io.pfrio_size;
 	return (0);
 }
 
