@@ -23,13 +23,12 @@
 #include "util_funcs.h"
 #include "pfMIBObjects.h"
 
-enum { IN, OUT };
-enum { IPV4, IPV6 };
-enum { PASS, BLOCK };
+int	dev = -1;
+char *pfi_table[255][255];
+unsigned int pfi_count;
+time_t pfi_table_age;
 
-int dev = -1;
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
-
 
 struct variable4 pfMIBObjects_variables[] = {
 /*  magic number        , variable type , ro/rw , callback fn  , L, oidsuffix */

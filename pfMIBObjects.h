@@ -95,6 +95,10 @@
 #define PFI_IFTYPE_DETACH	2
 #define PFI_TABLE_MAXAGE	5
 
+enum { IN, OUT };
+enum { IPV4, IPV6 };
+enum { PASS, BLOCK };
+
 config_require(util_funcs)
 
 FindVarMethod var_if_number;
@@ -103,16 +107,12 @@ FindVarMethod var_limits;
 FindVarMethod var_pfMIBObjects;
 FindVarMethod var_timeouts;
 
-char		*pfi_table[255][255];
-unsigned int	 pfi_count;
-time_t		 pfi_table_age;
-
 /* from pfctl */
 struct pfr_buffer {
-	int  pfrb_type; /* type of content, see enum above */
-	int  pfrb_size; /* number of objects in buffer */
-	int  pfrb_msize;    /* maximum number of objects in buffer */
-	void    *pfrb_caddr;    /* malloc'ated memory area */
+	int	 pfrb_type;	/* type of content, see enum above */
+	int	 pfrb_size;	/* number of objects in buffer */
+	int	 pfrb_msize;	/* maximum number of objects in buffer */
+	void    *pfrb_caddr;	/* malloc'ated memory area */
 };
 
 
