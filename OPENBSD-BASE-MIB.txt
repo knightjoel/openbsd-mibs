@@ -1,0 +1,31 @@
+OPENBSD-BASE-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, enterprises
+		FROM SNMPv2-SMI
+
+	MODULE-COMPLIANCE, OBJECT-GROUP
+		FROM SNMPv2-CONF;
+
+OpenBSD MODULE-IDENTITY
+    LAST-UPDATED "0403270000Z"
+    ORGANIZATION "OpenBSD"
+    CONTACT-INFO "
+                  Author:     Joel Knight
+                  email:      enabled@myrealbox.com
+                 "
+    DESCRIPTION "The base MIB module for the OpenBSD project."
+-- FIXME: http://www.iana.org/assignments/smi-numbers
+    ::= { enterprises 64512 }
+
+
+-- define MIB objects
+
+-- OPENBSD-PF-MIB:
+-- pfMIBObjects				OBJECT IDENTIFIER ::= { OpenBSD 1 }
+
+
+
+-- END:  Don't forget this!
+END
+

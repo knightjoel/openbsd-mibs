@@ -5,8 +5,8 @@
  */
 
 
-#ifndef _MIBGROUP_OPENBSD_H
-#define _MIBGROUP_OPENBSD_H
+#ifndef _MIBGROUP_PFMIBOBJECTS_H
+#define _MIBGROUP_PFMIBOBJECTS_H
 
 #define RUNNING               1
 #define RUNTIME               2
@@ -45,9 +45,9 @@ config_require(util_funcs)
 
 
 /* function prototypes */
-void   init_OpenBSD(void);
-FindVarMethod var_OpenBSD;
+void   init_pfMIBObjects(void);
+FindVarMethod var_pfMIBObjects;
 
 
 
-#endif /* _MIBGROUP_OPENBSD_H */
+#endif /* _MIBGROUP_PFMIBOBJECTS_H */

@@ -21,62 +21,62 @@
 
 #include "mibincl.h"
 #include "util_funcs.h"
-#include "OpenBSD.h"
+#include "pfMIBObjects.h"
 
 enum { IN, OUT };
 enum { IPV4, IPV6 };
 
 int dev = -1;
-oid OpenBSD_variables_oid[] = { 1,3,6,1,4,1,64512 };
+oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
 
 
-struct variable4 OpenBSD_variables[] = {
+struct variable2 pfMIBObjects_variables[] = {
 /*  magic number        , variable type , ro/rw , callback fn  , L, oidsuffix */
-  { RUNNING             , ASN_INTEGER   , RONLY , var_OpenBSD, 3, { 1,1,1 } },
-  { RUNTIME             , ASN_TIMETICKS , RONLY , var_OpenBSD, 3, { 1,1,2 } },
-  { DEBUG               , ASN_INTEGER   , RONLY , var_OpenBSD, 3, { 1,1,3 } },
-  { HOSTID              , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,1,4 } },
-  { MATCH               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,1 } },
-  { BADOFFSET           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,2 } },
-  { FRAGMENT            , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,3 } },
-  { SHORT               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,4 } },
-  { NORMALIZE           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,5 } },
-  { MEMORY              , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,6 } },
-  { STATES_COUNT        , ASN_UNSIGNED  , RONLY , var_OpenBSD, 3, { 1,3,1 } },
-  { STATES_SEARCHES     , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,2 } },
-  { STATES_INSERTS      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,3 } },
-  { STATES_REMOVALS     , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,4 } },
-  { NAME                , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,4,1 } },
-  { IPBYTESIN           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,2 } },
-  { IPBYTESOUT          , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,3 } },
-  { IPPKTSINPASS        , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,4 } },
-  { IPPKTSINDROP        , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,5 } },
-  { IPPKTSOUTPASS       , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,6 } },
-  { IPPKTSOUTDROP       , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,7 } },
-  { IP6BYTESIN          , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,8 } },
-  { IP6BYTESOUT         , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,9 } },
-  { IP6PKTSINPASS       , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,10 } },
-  { IP6PKTSINDROP       , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,11 } },
-  { IP6PKTSOUTPASS      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,12 } },
-  { IP6PKTSOUTDROP      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,13 } },
-  { SRCTRACK_COUNT      , ASN_UNSIGNED  , RONLY , var_OpenBSD, 3, { 1,5,1 } },
-  { SRCTRACK_SEARCHES   , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,2 } },
-  { SRCTRACK_INSERTS    , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,3 } },
-  { SRCTRACK_REMOVALS   , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,4 } },
+  { RUNNING             , ASN_INTEGER   , RONLY , var_pfMIBObjects, 2, { 1,1 } },
+  { RUNTIME             , ASN_TIMETICKS , RONLY , var_pfMIBObjects, 2, { 1,2 } },
+  { DEBUG               , ASN_INTEGER   , RONLY , var_pfMIBObjects, 2, { 1,2 } },
+  { HOSTID              , ASN_OCTET_STR , RONLY , var_pfMIBObjects, 2, { 1,4 } },
+  { MATCH               , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,1 } },
+  { BADOFFSET           , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,2 } },
+  { FRAGMENT            , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,2 } },
+  { SHORT               , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,4 } },
+  { NORMALIZE           , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,5 } },
+  { MEMORY              , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,6 } },
+  { STATES_COUNT        , ASN_UNSIGNED  , RONLY , var_pfMIBObjects, 2, { 2,1 } },
+  { STATES_SEARCHES     , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,2 } },
+  { STATES_INSERTS      , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,2 } },
+  { STATES_REMOVALS     , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,4 } },
+  { NAME                , ASN_OCTET_STR , RONLY , var_pfMIBObjects, 2, { 4,1 } },
+  { IPBYTESIN           , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,2 } },
+  { IPBYTESOUT          , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,2 } },
+  { IPPKTSINPASS        , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,4 } },
+  { IPPKTSINDROP        , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,5 } },
+  { IPPKTSOUTPASS       , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,6 } },
+  { IPPKTSOUTDROP       , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,7 } },
+  { IP6BYTESIN          , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,8 } },
+  { IP6BYTESOUT         , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,9 } },
+  { IP6PKTSINPASS       , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,10 } },
+  { IP6PKTSINDROP       , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,11 } },
+  { IP6PKTSOUTPASS      , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,12 } },
+  { IP6PKTSOUTDROP      , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,12 } },
+  { SRCTRACK_COUNT      , ASN_UNSIGNED  , RONLY , var_pfMIBObjects, 2, { 5,1 } },
+  { SRCTRACK_SEARCHES   , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,2 } },
+  { SRCTRACK_INSERTS    , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,2 } },
+  { SRCTRACK_REMOVALS   , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,4 } },
 };
 /*    (L = length of the oidsuffix) */
 
 
-void init_OpenBSD(void) {
-	REGISTER_MIB("OpenBSD", OpenBSD_variables, variable4,
-			OpenBSD_variables_oid);
+void init_pfMIBObjects(void) {
+	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable2,
+			pfMIBObjects_variables_oid);
 
 	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
 		ERROR_MSG("Could not open /dev/pf");
 }
 
 unsigned char *
-var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
+var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t  *var_len, WriteMethod **write_method)
 {
 	struct pf_status s;
