@@ -21,7 +21,8 @@ OPENBSD-PF-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
 	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, 
-	Counter32, Counter64, Unsigned32, IpAddress, enterprises
+	Counter32, Counter64, Unsigned32, Integer32, IpAddress,
+	TimeTicks, enterprises
 		FROM SNMPv2-SMI
 
 	TruthValue
@@ -34,7 +35,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "0410170000Z"
+    LAST-UPDATED "200501250000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -530,7 +531,7 @@ ifNumber  OBJECT-TYPE
 	::= { interfaces 1 }
 
 ifTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF ifEntry
+	SYNTAX		SEQUENCE OF IfEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
@@ -563,6 +564,14 @@ IfEntry ::=
 		ifOut4PassBytes		Counter64,
 		ifOut4BlockPkts		Counter64,
 		ifOut4BlockBytes	Counter64,
+		ifIn6PassPkts		Counter64,
+		ifIn6PassBytes		Counter64,
+		ifIn6BlockPkts		Counter64,
+		ifIn6BlockBytes		Counter64,
+		ifOut6PassPkts		Counter64,
+		ifOut6PassBytes		Counter64,
+		ifOut6BlockPkts		Counter64,
+		ifOut6BlockBytes	Counter64
 	}
 
 ifIndex OBJECT-TYPE
@@ -751,7 +760,7 @@ tblNumber  OBJECT-TYPE
 	::= { tables 1 }
 
 tblTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF tblEntry
+	SYNTAX		SEQUENCE OF TblEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
@@ -790,7 +799,7 @@ TblEntry ::=
 		tblOutBlockBytes	Counter64,
 		tblOutXPassPkts		Counter64,
 		tblOutXPassBytes	Counter64,
-		tblStatsCleared		Unsigned32,
+		tblStatsCleared		Unsigned32
 	}
 
 tblIndex OBJECT-TYPE
@@ -954,7 +963,7 @@ tblOutXPassBytes OBJECT-TYPE
 	::= { tblEntry 19 }
 
 tblAddrTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF tblAddrEntry
+	SYNTAX		SEQUENCE OF TblAddrEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
@@ -985,7 +994,7 @@ TblAddrEntry ::=
 		tblAddrOutBlockPkts	Counter64,
 		tblAddrOutBlockBytes	Counter64,
 		tblAddrOutPassPkts	Counter64,
-		tblAddrOutPassBytes	Counter64,
+		tblAddrOutPassBytes	Counter64
 	}
 
 tblAddrTblIndex OBJECT-TYPE
