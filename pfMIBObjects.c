@@ -98,15 +98,15 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &long_ret;
 
 		case UPTIME:
-			long_ret = 0;
+			long_ret = (long) s.since * 100;
 			return (unsigned char *) &long_ret;
 
 		case DEBUG:
-			long_ret = 0;
+			long_ret = (long) s.debug;
 			return (unsigned char *) &long_ret;
 
 		case HOSTID:
-			*string = 0;
+			sprintf(string, "0x%08x", ntohl(s.hostid));
 			*var_len = strlen(string);
 			return (unsigned char *) string;
 
@@ -147,7 +147,7 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &c64;
 
 		case COUNT:
-			ulong_ret = 0;
+			ulong_ret = (long) s.states;
 			return (unsigned char *) &ulong_ret;
 
 		case SEARCHES:
@@ -169,7 +169,7 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &c64;
 
 		case NAME:
-			*string = 0;
+			sprintf(string, "%s", s.ifname);
 			*var_len = strlen(string);
 			return (unsigned char *) string;
 
