@@ -757,9 +757,12 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 
 	index = name[*length-1];
 
-	PFRB_FOREACH(ts, &b)
+	PFRB_FOREACH(ts, &b) {
+		if (!(ts->pfrts_flags & PFR_TFLAG_ACTIVE))
+			continue;
 		if (++i == index)
 			break;
+	}
 
 	if (ts == NULL) {
 		free(b.pfrb_caddr);
@@ -956,8 +959,11 @@ pft_refresh(void)
 	}
 
 	pft_count = 0;
-	PFRB_FOREACH(ts, &b)
+	PFRB_FOREACH(ts, &b) {
+		if (!(ts->pfrts_flags & PFR_TFLAG_ACTIVE))
+			continue;
 		pft_count++;
+	}
 
 	free(b.pfrb_caddr);
 
