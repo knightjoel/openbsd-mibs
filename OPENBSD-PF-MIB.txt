@@ -235,7 +235,8 @@ name OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"The name of the interface configured using 'set loginterface'."
+	"The name of the interface configured using 'set loginterface'.
+	If no interface has been configured, the object will be empty."
     ::= { loginterface 1 }
 
 ipBytesIn OBJECT-TYPE
