@@ -5,19 +5,25 @@
  */
 
 
-#ifdef IN_UCD_SNMP_SOURCE
 #include <config.h>
+
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+
+#include <netinet/in.h>
+#include <net/if.h>
+#include <net/pfvar.h>
+#include <arpa/inet.h>
+
 #include "mibincl.h"
 #include "util_funcs.h"
-#else /* !IN_UCD_SNMP_SOURCE */
-#include <ucd-snmp/ucd-snmp-config.h>
-#include <ucd-snmp/ucd-snmp-includes.h>
-#include <ucd-snmp/ucd-snmp-agent-includes.h>
-#endif /* !IN_UCD_SNMP_SOURCE */
-
 #include "OpenBSD.h"
 
 
+int dev = -1;
 oid OpenBSD_variables_oid[] = { 1,3,6,1,4,1,64512 };
 
 
@@ -28,7 +34,7 @@ struct variable4 OpenBSD_variables[] = {
   { DEBUG               , ASN_INTEGER   , RONLY , var_OpenBSD, 3, { 1,1,3 } },
   { HOSTID              , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,1,4 } },
   { MATCH               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,1 } },
-  { BAD-OFFSET          , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,2 } },
+  { BADOFFSET           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,2 } },
   { FRAGMENT            , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,3 } },
   { SHORT               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,4 } },
   { NORMALIZE           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,5 } },
@@ -56,12 +62,17 @@ struct variable4 OpenBSD_variables[] = {
 void init_OpenBSD(void) {
 	REGISTER_MIB("OpenBSD", OpenBSD_variables, variable4,
 			OpenBSD_variables_oid);
+
+	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
+		ERROR_MSG("Could not open /dev/pf: %s");
 }
 
 unsigned char *
 var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t  *var_len, WriteMethod **write_method)
 {
+	struct pf_status s;
+	
 	static long long_ret;
 	static u_long ulong_ret;
 	static unsigned char string[SPRINT_MAX_LEN];
@@ -72,11 +83,18 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			== MATCH_FAILED )
 		return NULL;
 
+	if (dev == -1)
+		return NULL;
+
+	if (ioctl(dev, DIOCGETSTATUS, &s)) {
+		ERROR_MSG("ioctl error doing DIOCGETSTATUS");
+		return NULL;
+	}
 
 	switch(vp->magic) {
 
 		case RUNNING:
-			long_ret = 0;
+			long_ret = (long) s.running;
 			return (unsigned char *) &long_ret;
 
 		case UPTIME:
@@ -98,7 +116,7 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
-		case BAD-OFFSET:
+		case BADOFFSET:
 			c64.high = 0;
 			c64.low = 0;
 			*var_len = sizeof(c64);

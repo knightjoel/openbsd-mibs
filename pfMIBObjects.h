@@ -13,7 +13,7 @@
 #define DEBUG                 3
 #define HOSTID                4
 #define MATCH                 5
-#define BAD-OFFSET            6
+#define BADOFFSET             6
 #define FRAGMENT              7
 #define SHORT                 8
 #define NORMALIZE             9
