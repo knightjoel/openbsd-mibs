@@ -46,7 +46,7 @@ struct variable4 pfMIBObjects_variables[] = {
   { STATES_SEARCHES	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 3,2 } },
   { STATES_INSERTS	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 3,2 } },
   { STATES_REMOVALS	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 3,4 } },
-  { NAME		, ASN_OCTET_STR , RONLY , var_pfMIBObjects, 2, { 4,1 } },
+  { PF_LOGIF_NAME	, ASN_OCTET_STR , RONLY , var_pfMIBObjects, 2, { 4,1 } },
   { IPBYTESIN		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,2 } },
   { IPBYTESOUT		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,2 } },
   { IPPKTSINPASS	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 4,4 } },
@@ -272,7 +272,7 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
-		case NAME:
+		case PF_LOGIF_NAME:
 			strlcpy(string, s.ifname, sizeof(string));
 			*var_len = strlen(string);
 			return (unsigned char *) string;

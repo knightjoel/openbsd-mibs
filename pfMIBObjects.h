@@ -28,7 +28,7 @@
 #define STATES_SEARCHES		12
 #define STATES_INSERTS		13
 #define STATES_REMOVALS		14
-#define NAME			15
+#define PF_LOGIF_NAME		15
 #define IPBYTESIN		16
 #define IPBYTESOUT		17
 #define IPPKTSINPASS		18
