@@ -37,12 +37,12 @@ pfMIBObjects MODULE-IDENTITY
 --			hostid(4)
 --		counters(2)
 --			match(1)
---			bad-offset(2)
+--			badOffset(2)
 --			fragment(3)
 --			short(4)
 --			normalize(5)
 --			memory(6)
---		state-table(3)
+--		stateTable(3)
 --			count(1)
 --			searches(2)
 --			inserts(3)
@@ -61,14 +61,14 @@ pfMIBObjects MODULE-IDENTITY
 --			ip6PktsInDrop(11)
 --			ip6PktsOutPass(12)
 --			ip6PktsOutDrop(13)
---		source-track(5)
+--		sourceTrack(5)
 --			count(1)
 --			searches(2)
 --			inserts(3)
 --			removals(4)
 --		limits(6)
 --			states(1)
---			src-nodes(2)
+--			sourceNodes(2)
 --			fragments(3)
 --		timeouts(7)
 --			tcpFirst(1)
@@ -96,9 +96,9 @@ pfMIBObjects MODULE-IDENTITY
 
 info				OBJECT IDENTIFIER ::= { pfMIBObjects 1 }
 counters			OBJECT IDENTIFIER ::= { pfMIBObjects 2 }
-state-table			OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
+stateTable			OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
 loginterface			OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
-source-track			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
+sourceTracking			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
 limits				OBJECT IDENTIFIER ::= { pfMIBObjects 6 }
 timeouts			OBJECT IDENTIFIER ::= { pfMIBObjects 7 }
 
@@ -152,7 +152,7 @@ match OBJECT-TYPE
 	"The number of packets that have matched a filter rule."
     ::= { counters 1 }
 
-bad-offset OBJECT-TYPE
+badOffset OBJECT-TYPE
     SYNTAX      Counter64
     MAX-ACCESS  read-only
     STATUS      current
@@ -193,7 +193,7 @@ memory OBJECT-TYPE
     ::= { counters 6 }
 
 
--- state-table
+-- stateTable
 
 count OBJECT-TYPE
     SYNTAX      Unsigned32
@@ -201,7 +201,7 @@ count OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of entries in the state table."
-    ::= { state-table 1 }
+    ::= { stateTable 1 }
 
 searches OBJECT-TYPE
     SYNTAX      Counter64
@@ -209,7 +209,7 @@ searches OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of searches against the state table."
-    ::= { state-table 2 }
+    ::= { stateTable 2 }
 
 inserts OBJECT-TYPE
     SYNTAX      Counter64
@@ -217,7 +217,7 @@ inserts OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of inserts into the state table."
-    ::= { state-table 3 }
+    ::= { stateTable 3 }
 
 removals OBJECT-TYPE
     SYNTAX      Counter64
@@ -225,7 +225,7 @@ removals OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of removals from the state table."
-    ::= { state-table 4 }
+    ::= { stateTable 4 }
 
 
 -- loginterface
@@ -336,7 +336,7 @@ ip6PktsOutDrop OBJECT-TYPE
     ::= { loginterface 13 }
 
 
--- source-track
+-- sourceTracking
 
 count OBJECT-TYPE
     SYNTAX      Unsigned32
@@ -344,7 +344,7 @@ count OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of entries in the source tracking table."
-    ::= { source-track 1 }
+    ::= { sourceTracking 1 }
 
 searches OBJECT-TYPE
     SYNTAX      Counter64
@@ -352,7 +352,7 @@ searches OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of searches against the source tracking table."
-    ::= { source-track 2 }
+    ::= { sourceTracking 2 }
 
 inserts OBJECT-TYPE
     SYNTAX      Counter64
@@ -360,7 +360,7 @@ inserts OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of inserts into the source tracking table."
-    ::= { source-track 3 }
+    ::= { sourceTracking 3 }
 
 removals OBJECT-TYPE
     SYNTAX      Counter64
@@ -368,7 +368,7 @@ removals OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of removals from the source tracking table."
-    ::= { source-track 4 }
+    ::= { sourceTracking 4 }
 
 
 -- limits
@@ -382,7 +382,7 @@ states OBJECT-TYPE
 	table entries (filter rules that specify 'keep state')."
 	::= { limits 1 }
 
-source-nodes OBJECT-TYPE
+sourceNodes OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
