@@ -636,9 +636,9 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &ulong_ret;
 
 		case PF_IFNAME:
-			*var_len = strlen(p->pfif_name);
+			*var_len = strlen(&pfi_table[index]);
 			free(b.pfrb_caddr);
-			return (unsigned char *) p->pfif_name;
+			return (unsigned char *) pfi_table[index];
 
 		case PF_IFTYPE:
 			ulong_ret = PFI_IFTYPE_INSTANCE;
@@ -753,6 +753,7 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 	struct pfr_tstats *ts = NULL;
 	static struct counter64 c64;
 	static u_long ulong_ret;
+	static char tname[PF_TABLE_NAME_SIZE];
 	int index, i = 0;
 
 	if (dev == -1)
@@ -790,9 +791,10 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &ulong_ret;
 
 		case PF_TANAME:
-			*var_len = strlen(ts->pfrts_t.pfrt_name);
+			*var_len = strlen(ts->pfrts_name);
+			strlcpy(tname, ts->pfrts_name, sizeof(tname));
 			free(b.pfrb_caddr);
-			return (unsigned char *) ts->pfrts_t.pfrt_name;
+			return (unsigned char *) tname;
 
 		case PF_TAADDRESSES:
 			ulong_ret = ts->pfrts_cnt;
