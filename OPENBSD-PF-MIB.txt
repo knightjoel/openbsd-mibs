@@ -81,7 +81,7 @@ running OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"Indicates whether pf is enabled or not. This is a boolean value."
+	"Indicates whether pf is enabled or not."
     ::= { info 1 }
 
 uptime OBJECT-TYPE
@@ -90,7 +90,7 @@ uptime OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"Indicates in seconds how long pf has been enabled. If pf is not
+	"Indicates how long pf has been enabled. If pf is not
 	enabled, this object will be 0."
     ::= { info 2 }
 
@@ -178,7 +178,7 @@ searches OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"The number of searches against the state table.."
+	"The number of searches against the state table."
     ::= { states 2 }
 
 inserts OBJECT-TYPE
@@ -205,7 +205,7 @@ name OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-	"The interface configured using 'set loginterface'."
+	"The name of the interface configured using 'set loginterface'."
     ::= { loginterface 1 }
 
 ipBytesIn OBJECT-TYPE
