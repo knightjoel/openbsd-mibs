@@ -120,7 +120,9 @@ runtime OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"Indicates how long pf has been enabled. If pf is not
-	enabled, indicates how long pf has been disabled."
+	enabled, indicates how long pf has been disabled. If pf has not
+	been explicitly enabled or disabled since the system was booted,
+	the value will be 0."
     ::= { info 2 }
 
 debug OBJECT-TYPE

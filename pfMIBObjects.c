@@ -172,7 +172,10 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &long_ret;
 
 		case RUNTIME:
-			runtime = time(NULL) - s.since;
+			if (s.since > 0)
+				runtime = time(NULL) - s.since;
+			else
+				runtime = 0;
 			long_ret = (long) runtime * 100;
 			return (unsigned char *) &long_ret;
 
