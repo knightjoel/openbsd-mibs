@@ -25,12 +25,13 @@
 
 enum { IN, OUT };
 enum { IPV4, IPV6 };
+enum { PASS, BLOCK };
 
 int dev = -1;
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
 
 
-struct variable2 pfMIBObjects_variables[] = {
+struct variable4 pfMIBObjects_variables[] = {
 /*  magic number        , variable type , ro/rw , callback fn  , L, oidsuffix */
   { RUNNING             , ASN_INTEGER   , RONLY , var_pfMIBObjects, 2, { 1,1 } },
   { RUNTIME             , ASN_TIMETICKS , RONLY , var_pfMIBObjects, 2, { 1,2 } },
@@ -85,15 +86,41 @@ struct variable2 pfMIBObjects_variables[] = {
   { TM_ADAPT_START      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,17 } },
   { TM_ADAPT_END        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,18 } },
   { TM_SRC_TRACK        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,19 } },
+  { PF_IFNUMBER         , ASN_INTEGER   , RONLY , var_if_number, 2, { 8,1 } },
+  { PF_IFINDEX          , ASN_INTEGER   , RONLY , var_if_table, 4, { 8,128,1,1 } },
+  { PF_IFNAME           , ASN_OCTET_STR , RONLY , var_if_table, 4, { 8,128,1,2 } },
+  { PF_IFTYPE           , ASN_INTEGER   , RONLY , var_if_table, 4, { 8,128,1,3 } },
+  { PF_IFREF			, ASN_UNSIGNED	, RONLY	, var_if_table, 4, { 8,128,1,4 } },
+  { PF_IFRULES			, ASN_UNSIGNED	, RONLY	, var_if_table, 4, { 8,128,1,5 } },
+  { PF_IFIN4PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,6 } },
+  { PF_IFIN4PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,7 } },
+  { PF_IFIN4BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,8 } },
+  { PF_IFIN4BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,9 } },
+  { PF_IFOUT4PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,10 } },
+  { PF_IFOUT4PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,11 } },
+  { PF_IFOUT4BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,12 } },
+  { PF_IFOUT4BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,13 } },
+  { PF_IFIN6PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,14 } },
+  { PF_IFIN6PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,15 } },
+  { PF_IFIN6BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,16 } },
+  { PF_IFIN6BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,17 } },
+  { PF_IFOUT6PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,18 } },
+  { PF_IFOUT6PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,19 } },
+  { PF_IFOUT6BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,20 } },
+  { PF_IFOUT6BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,21 } },
 };
 
 
 void init_pfMIBObjects(void) {
-	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable2,
+	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable4,
 			pfMIBObjects_variables_oid);
 
 	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
 		ERROR_MSG("Could not open /dev/pf");
+
+	bzero(&pfi_table, sizeof(pfi_table));
+	pfi_count = 0;
+	pfi_refresh();
 }
 
 unsigned char *
@@ -457,5 +484,328 @@ var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
 	}
 	long_ret = pt.seconds;
 	return (unsigned char *) &long_ret;
+}
+
+unsigned char *
+var_if_number(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	static u_long ulong_ret;
+
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+			== MATCH_FAILED)
+		return (NULL);
+
+	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
+		pfi_refresh();
+
+	switch (vp->magic) {
+		case PF_IFNUMBER:
+			ulong_ret = pfi_count;
+			return (unsigned char *) &ulong_ret;
+		
+		default:
+			ERROR_MSG("");
+			return (NULL);
+	}
+}
+
+
+unsigned char *
+var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfr_buffer b;
+	struct pfi_if *p;
+	int index;
+	static struct counter64 c64;
+	static u_long ulong_ret;
+
+	if (header_simple_table(vp, name, length, exact, var_len, write_method, pfi_count)
+			== MATCH_FAILED)
+		return (NULL);
+
+	if (dev == -1)
+		return (NULL);
+
+	index = name[*length-1]-1;
+	if (!pfi_table[index])
+		return (NULL);
+
+	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
+		pfi_refresh();
+
+	if (pfi_get(&b, (const char *)&pfi_table[index], PFI_FLAG_INSTANCE) 
+			|| b.pfrb_size == 0) {
+		free(b.pfrb_caddr);
+		switch (vp->magic) {
+			case PF_IFINDEX:
+				ulong_ret = index + 1;
+				return (unsigned char *) &ulong_ret;
+
+			case PF_IFNAME:
+				*var_len = strlen(&pfi_table[index]);
+				return (unsigned char *) pfi_table[index];
+
+			case PF_IFTYPE:
+				ulong_ret = PFI_IFTYPE_DETACH;
+				return (unsigned char *) &ulong_ret;
+
+			case PF_IFREF:
+			case PF_IFRULES:
+				ulong_ret = 0;
+				return (unsigned char *) &ulong_ret;
+
+			default:
+				c64.high = 0;
+				c64.low = 0;
+				*var_len = sizeof(c64);
+				return (unsigned char *) &c64;
+		}
+	} 
+	/* we only ask for 1 interface from pfi_get() */
+	p = b.pfrb_caddr;
+
+	switch (vp->magic) {
+		case PF_IFINDEX:
+			ulong_ret = index + 1;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_IFNAME:
+			*var_len = strlen(p->pfif_name);
+			free(b.pfrb_caddr);
+			return (unsigned char *) p->pfif_name;
+
+		case PF_IFTYPE:
+			ulong_ret = PFI_IFTYPE_INSTANCE;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_IFREF:
+			ulong_ret = p->pfif_states;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_IFRULES:
+			ulong_ret = p->pfif_rules;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_IFIN4PASSPKTS:
+			c64.high = p->pfif_packets[IPV4][IN][PASS] >> 32;
+			c64.low = p->pfif_packets[IPV4][IN][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFIN4PASSBYTES:
+			c64.high = p->pfif_bytes[IPV4][IN][PASS] >> 32;
+			c64.low = p->pfif_bytes[IPV4][IN][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFIN4BLOCKPKTS:
+			c64.high = p->pfif_packets[IPV4][IN][BLOCK] >> 32;
+			c64.low = p->pfif_packets[IPV4][IN][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFIN4BLOCKBYTES:
+			c64.high = p->pfif_bytes[IPV4][IN][BLOCK] >> 32;
+			c64.low = p->pfif_bytes[IPV4][IN][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFOUT4PASSPKTS:
+			c64.high = p->pfif_packets[IPV4][OUT][PASS] >> 32;
+			c64.low = p->pfif_packets[IPV4][OUT][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFOUT4PASSBYTES:
+			c64.high = p->pfif_bytes[IPV4][OUT][PASS] >> 32;
+			c64.low = p->pfif_bytes[IPV4][OUT][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFOUT4BLOCKPKTS:
+			c64.high = p->pfif_packets[IPV4][OUT][BLOCK] >> 32;
+			c64.low = p->pfif_packets[IPV4][OUT][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFOUT4BLOCKBYTES:
+			c64.high = p->pfif_bytes[IPV4][OUT][BLOCK] >> 32;
+			c64.low = p->pfif_bytes[IPV4][OUT][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFIN6PASSPKTS:
+			c64.high = p->pfif_packets[IPV6][IN][PASS] >> 32;
+			c64.low = p->pfif_packets[IPV6][IN][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFIN6PASSBYTES:
+			c64.high = p->pfif_bytes[IPV6][IN][PASS] >> 32;
+			c64.low = p->pfif_bytes[IPV6][IN][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFIN6BLOCKPKTS:
+			c64.high = p->pfif_packets[IPV6][IN][BLOCK] >> 32;
+			c64.low = p->pfif_packets[IPV6][IN][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFIN6BLOCKBYTES:
+			c64.high = p->pfif_bytes[IPV6][IN][BLOCK] >> 32;
+			c64.low = p->pfif_bytes[IPV6][IN][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFOUT6PASSPKTS:
+			c64.high = p->pfif_packets[IPV6][OUT][PASS] >> 32;
+			c64.low = p->pfif_packets[IPV6][OUT][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFOUT6PASSBYTES:
+			c64.high = p->pfif_bytes[IPV6][OUT][PASS] >> 32;
+			c64.low = p->pfif_bytes[IPV6][OUT][PASS] & 0xffffffff;
+			break;
+
+		case PF_IFOUT6BLOCKPKTS:
+			c64.high = p->pfif_packets[IPV6][OUT][BLOCK] >> 32;
+			c64.low = p->pfif_packets[IPV6][OUT][BLOCK] & 0xffffffff;
+			break;
+
+		case PF_IFOUT6BLOCKBYTES:
+			c64.high = p->pfif_bytes[IPV6][OUT][BLOCK] >> 32;
+			c64.low = p->pfif_bytes[IPV6][OUT][BLOCK] & 0xffffffff;
+			break;
+			
+		default:
+			ERROR_MSG("");
+			return (NULL);
+	}
+	
+	free(b.pfrb_caddr);
+	*var_len = sizeof(c64);
+	return (unsigned char *) &c64;
+}
+
+int
+pfi_get(struct pfr_buffer *b, const char *filter, int flags)
+{
+	bzero(b, sizeof(struct pfr_buffer));
+	for (;;) {
+		pfr_buf_grow(b, b->pfrb_size);
+        b->pfrb_size = b->pfrb_msize;
+        if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size), flags)) {
+		ERROR_MSG("pfi_get_ifaces() failed");
+		return (1);
+        }
+        if (b->pfrb_size <= b->pfrb_msize)
+		break;
+    }
+
+	return (0);
+}
+
+int
+pfi_refresh(void)
+{
+	struct pfr_buffer b;
+	struct pfi_if *p;
+	int i, match=0;
+
+	if (pfi_get(&b, NULL, PFI_FLAG_INSTANCE)) {
+		ERROR_MSG("Could not get list of interfaces");
+		return (1);
+	}
+
+	for (p = pfr_buf_next(&b, NULL); p != NULL; 
+			p = pfr_buf_next(&b, p), match = 0) {
+		for (i = 0; i < pfi_count && !match; i++) {
+			if (strncmp(p->pfif_name, &pfi_table[i], IFNAMSIZ) == 0)
+				match = 1;
+		}
+		if (!match) {
+			snprintf(pfi_table[pfi_count], IFNAMSIZ, p->pfif_name);
+			pfi_count++;
+		}
+	}
+
+	pfi_table_age = time(NULL);
+	free(b.pfrb_caddr);
+
+	return (0);
+}
+
+/* the following code taken from pfctl(8) in OpenBSD 3.5-release */
+
+int
+pfi_get_ifaces(const char *filter, struct pfi_if *buf, int *size, int flags)
+{
+	struct pfioc_iface io;
+
+	bzero(&io, sizeof(io));
+	io.pfiio_flags = flags;
+	if (filter != NULL) {
+		if (strlcpy(io.pfiio_name, filter, sizeof(io.pfiio_name)) >=
+			sizeof(io.pfiio_name)) {
+			ERROR_MSG("strlcpy(): source buffer too large");
+			return (-1);
+		}
+	}
+	io.pfiio_buffer = buf;
+	io.pfiio_esize = sizeof(*buf);
+	io.pfiio_size = *size;
+	if (ioctl(dev, DIOCIGETIFACES, &io)) {
+		ERROR_MSG("ioct failed");
+		return (-1);
+	}
+	*size = io.pfiio_size;
+
+	return (0);
+}
+
+int
+pfr_buf_grow(struct pfr_buffer *b, int minsize)
+{
+	caddr_t p;
+	size_t bs;
+
+	if (minsize != 0 && minsize <= b->pfrb_msize)
+		return (0);
+	bs = sizeof(struct pfi_if);
+	if (!b->pfrb_msize) {
+		if (minsize < 64)
+			minsize = 64;
+		b->pfrb_caddr = calloc(bs, minsize);
+		if (b->pfrb_caddr == NULL)
+			return (-1);
+		b->pfrb_msize = minsize;
+	} else {
+		if (minsize == 0)
+			minsize = b->pfrb_msize * 2;
+		if (minsize < 0 || minsize >= SIZE_T_MAX / bs) {
+			/* msize overflow */
+			return (-1);
+		}
+		p = realloc(b->pfrb_caddr, minsize * bs);
+		if (p == NULL)
+			return (-1);
+		bzero(p + b->pfrb_msize * bs, (minsize - b->pfrb_msize) * bs);
+		b->pfrb_caddr = p;
+		b->pfrb_msize = minsize;
+	}
+	return (0);
+}
+
+void *
+pfr_buf_next(struct pfr_buffer *b, const void *prev)
+{
+	size_t bs;
+
+	if (b == NULL)
+		return (NULL);
+	if (b->pfrb_size == 0)
+		return (NULL);
+	if (prev == NULL) 
+		return (b->pfrb_caddr);
+	bs = sizeof(struct pfi_if);
+	if ((((caddr_t)prev)-((caddr_t)b->pfrb_caddr)) / bs >= b->pfrb_size-1)
+		return (NULL);
+
+	return (((caddr_t)prev) + bs);
 }
 

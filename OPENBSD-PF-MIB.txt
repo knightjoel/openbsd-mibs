@@ -15,7 +15,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "0403270000Z"
+    LAST-UPDATED "0405290000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -101,7 +101,7 @@ loginterface			OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
 sourceTracking			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
 limits				OBJECT IDENTIFIER ::= { pfMIBObjects 6 }
 timeouts			OBJECT IDENTIFIER ::= { pfMIBObjects 7 }
-
+interfaces			OBJECT IDENTIFIER ::= { pfMIBObjects 8 }
 
 -- info
 
@@ -563,6 +563,227 @@ sourceTrack OBJECT-TYPE
 	last state expires."
 	::= { timeouts 19 }
 
+
+-- interfaces
+
+ifNumber  OBJECT-TYPE
+	SYNTAX      Integer32
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"The number of network interfaces present on this system."
+	::= { interfaces 1 }
+
+ifTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF ifEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"A list of individual interfaces. The number of entries is
+	given by the value of ifNumber."
+	::= { interfaces 128 }
+
+ifEntry OBJECT-TYPE
+	SYNTAX      IfEntry
+	MAX-ACCESS  not-accessible
+	STATUS      current
+	DESCRIPTION
+	"An entry containing management information applicable to a
+	particular interface."
+	INDEX   { ifIndex }
+	::= { ifTable 1 }
+
+IfEntry ::=
+	SEQUENCE {
+		ifIndex			Integer32,
+		ifDescr			OCTET STRING,
+		ifType			INTEGER,
+		ifRefs			Unsigned32,
+		ifRules			Unsigned32,
+		ifIn4PassPkts		Counter64,
+		ifIn4PassBytes		Counter64,
+		ifIn4BlockPkts		Counter64,
+		ifIn4BlockBytes		Counter64,
+		ifOut4PassPkts		Counter64,
+		ifOut4PassBytes		Counter64,
+		ifOut4BlockPkts		Counter64,
+		ifOut4BlockBytes	Counter64,
+	}
+
+ifIndex OBJECT-TYPE
+	SYNTAX		Integer32 (1..2147483647)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"A unique value, greater than zero, for each interface.  It
+	is recommended that values are assigned contiguously
+	starting from 1.  The value for each interface sub-layer
+	must remain constant at least from one re-initialization of
+	the entity's network management system to the next re-
+	initialization."
+	::= { ifEntry 1 }
+
+ifDescr OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The name of the interface."
+	::= { ifEntry 2 }
+
+ifType OBJECT-TYPE
+	SYNTAX 		INTEGER { group(0), instance(1), detached(2) }
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Denotes whether the interface is a group interface, an interface 
+	instance, or whether it's been removed or destroyed."
+	::= { ifEntry 3 }
+
+ifRefs OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of state and/or source track entries which reference 
+	the interface."
+	::= { ifEntry 4 }
+
+ifRules OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of rules which reference the interface."
+	::= { ifEntry 5 }
+
+ifIn4PassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv4 packets passed in."
+	::= { ifEntry 6 }
+
+ifIn4PassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv4 bytes passed in."
+	::= { ifEntry 7 }
+
+ifIn4BlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming IPv4 packets blocked."
+	::= { ifEntry 8 }
+
+ifIn4BlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming IPv4 bytes blocked."
+	::= { ifEntry 9 }
+
+ifOut4PassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv4 bytes passed out."
+	::= { ifEntry 10 }
+
+ifOut4PassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv4 bytes passed out."
+	::= { ifEntry 11 }
+
+ifOut4BlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing IPv4 bytes blocked."
+	::= { ifEntry 12 }
+
+ifOut4BlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing IPv4 bytes blocked."
+	::= { ifEntry 13 }
+
+ifIn6PassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv6 packets passed in."
+	::= { ifEntry 14 }
+
+ifIn6PassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv6 bytes passed in."
+	::= { ifEntry 15 }
+
+ifIn6BlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming IPv6 packets blocked."
+	::= { ifEntry 16 }
+
+ifIn6BlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming IPv6 bytes blocked."
+	::= { ifEntry 17 }
+
+ifOut6PassPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv6 bytes passed out."
+	::= { ifEntry 18 }
+
+ifOut6PassBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of IPv6 bytes passed out."
+	::= { ifEntry 19 }
+
+ifOut6BlockPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing IPv6 bytes blocked."
+	::= { ifEntry 20 }
+
+ifOut6BlockBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing IPv6 bytes blocked."
+	::= { ifEntry 21 }
 
 -- END:  Don't forget this!
 END
