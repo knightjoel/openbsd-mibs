@@ -47,6 +47,7 @@ struct variable4 OpenBSD_variables[] = {
   { INSERTS             , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,3 } },
   { REMOVALS            , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,3,4 } },
   { NAME                , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,4,1 } },
+  { IPBYTESIN           , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,2 } },
   { IPBYTESOUT          , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,3 } },
   { IPPKTSINPASS        , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,4 } },
   { IPPKTSINDROP        , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,5 } },
