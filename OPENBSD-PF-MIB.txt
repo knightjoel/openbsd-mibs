@@ -12,7 +12,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 OpenBSD MODULE-IDENTITY
-    LAST-UPDATED "0403240000Z"
+    LAST-UPDATED "0403270000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -31,7 +31,7 @@ OpenBSD MODULE-IDENTITY
 --		pfMIBObjects(1)
 --			info(1)
 --				running(1)
---				uptime(2)
+--				runtime(2)
 --				debug(3)
 --				hostid(4)
 --			counters(2)
@@ -84,14 +84,14 @@ running OBJECT-TYPE
 	"Indicates whether pf is enabled or not."
     ::= { info 1 }
 
-uptime OBJECT-TYPE
+runtime OBJECT-TYPE
     SYNTAX      TimeTicks
     UNITS      "1/100th of a Second"
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
 	"Indicates how long pf has been enabled. If pf is not
-	enabled, this object will be 0."
+	enabled, indicates how long pf has been disabled."
     ::= { info 2 }
 
 debug OBJECT-TYPE

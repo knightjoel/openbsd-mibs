@@ -9,7 +9,7 @@
 #define _MIBGROUP_OPENBSD_H
 
 #define RUNNING               1
-#define UPTIME                2
+#define RUNTIME               2
 #define DEBUG                 3
 #define HOSTID                4
 #define MATCH                 5

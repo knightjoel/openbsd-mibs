@@ -8,6 +8,7 @@
 #include <config.h>
 
 #include <fcntl.h>
+#include <time.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -30,7 +31,7 @@ oid OpenBSD_variables_oid[] = { 1,3,6,1,4,1,64512 };
 struct variable4 OpenBSD_variables[] = {
 /*  magic number        , variable type , ro/rw , callback fn  , L, oidsuffix */
   { RUNNING             , ASN_INTEGER   , RONLY , var_OpenBSD, 3, { 1,1,1 } },
-  { UPTIME              , ASN_TIMETICKS , RONLY , var_OpenBSD, 3, { 1,1,2 } },
+  { RUNTIME             , ASN_TIMETICKS , RONLY , var_OpenBSD, 3, { 1,1,2 } },
   { DEBUG               , ASN_INTEGER   , RONLY , var_OpenBSD, 3, { 1,1,3 } },
   { HOSTID              , ASN_OCTET_STR , RONLY , var_OpenBSD, 3, { 1,1,4 } },
   { MATCH               , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,2,1 } },
@@ -72,6 +73,7 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t  *var_len, WriteMethod **write_method)
 {
 	struct pf_status s;
+	time_t runtime;
 	
 	static long long_ret;
 	static u_long ulong_ret;
@@ -97,8 +99,9 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			long_ret = (long) s.running;
 			return (unsigned char *) &long_ret;
 
-		case UPTIME:
-			long_ret = (long) s.since * 100;
+		case RUNTIME:
+			runtime = time(NULL) - s.since;
+			long_ret = (long) runtime * 100;
 			return (unsigned char *) &long_ret;
 
 		case DEBUG:
