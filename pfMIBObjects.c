@@ -20,6 +20,7 @@
 
 #include <config.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <time.h>
 #include <sys/ioctl.h>
@@ -172,8 +173,10 @@ void init_pfMIBObjects(void) {
 	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable4,
 			pfMIBObjects_variables_oid);
 
-	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
-		ERROR_MSG("Could not open /dev/pf");
+	if ((dev = open("/dev/pf", O_RDONLY)) == -1) {
+		snmp_log(LOG_CRIT, "unable to open /dev/pf: %s\n", strerror(errno));
+		return;
+	}
 
 	bzero(&pfi_table, sizeof(pfi_table));
 	pfi_count = 0;
@@ -553,6 +556,9 @@ var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 	if (header_generic(vp, name, length, exact, var_len, write_method)
 			== MATCH_FAILED)
 		return (NULL);
+
+	if (dev == -1)
+		return NULL;
 
 	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
 		pfi_refresh();
