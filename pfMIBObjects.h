@@ -35,6 +35,10 @@
 #define IP6PKTSINDROP         25
 #define IP6PKTSOUTPASS        26
 #define IP6PKTSOUTDROP        27
+#define SRCTRACK_COUNT        28
+#define SRCTRACK_SEARCHES     29
+#define SRCTRACK_INSERTS      30
+#define SRCTRACK_REMOVALS     31
 
 
 config_require(util_funcs)

@@ -59,6 +59,10 @@ struct variable4 OpenBSD_variables[] = {
   { IP6PKTSINDROP       , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,11 } },
   { IP6PKTSOUTPASS      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,12 } },
   { IP6PKTSOUTDROP      , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,4,13 } },
+  { SRCTRACK_COUNT      , ASN_UNSIGNED  , RONLY , var_OpenBSD, 3, { 1,5,1 } },
+  { SRCTRACK_SEARCHES   , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,2 } },
+  { SRCTRACK_INSERTS    , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,3 } },
+  { SRCTRACK_REMOVALS   , ASN_COUNTER64 , RONLY , var_OpenBSD, 3, { 1,5,4 } },
 };
 /*    (L = length of the oidsuffix) */
 
@@ -251,6 +255,28 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
+		case SRCTRACK_COUNT:
+			ulong_ret = (long) s.src_nodes;
+			return (unsigned char *) &ulong_ret;
+
+		case SRCTRACK_SEARCHES:
+			c64.high = s.scounters[SCNT_SRC_NODE_SEARCH] >> 32;
+			c64.low = s.scounters[SCNT_SRC_NODE_SEARCH] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case SRCTRACK_INSERTS:
+			c64.high = s.scounters[SCNT_SRC_NODE_INSERT] >> 32;
+			c64.low = s.scounters[SCNT_SRC_NODE_INSERT] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case SRCTRACK_REMOVALS:
+			c64.high = s.scounters[SCNT_SRC_NODE_REMOVALS] >> 32;
+			c64.low = s.scounters[SCNT_SRC_NODE_REMOVALS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+						
 		default:
 			ERROR_MSG("");
 

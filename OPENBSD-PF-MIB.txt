@@ -60,6 +60,11 @@ OpenBSD MODULE-IDENTITY
 --				ip6PktsInDrop(11)
 --				ip6PktsOutPass(12)
 --				ip6PktsOutDrop(13)
+--			source-track(5)
+--				count(1)
+--				searches(2)
+--				inserts(3)
+--				removals(4)
 
 
 -- define MIB objects
@@ -72,6 +77,7 @@ info						OBJECT IDENTIFIER ::= { pfMIBObjects 1 }
 counters					OBJECT IDENTIFIER ::= { pfMIBObjects 2 }
 states						OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
 loginterface				OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
+source-track				OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
 
 
 -- info
@@ -303,6 +309,40 @@ ip6PktsOutDrop OBJECT-TYPE
 	"The number of dropped IPv6 packets going out on the loginterface."
     ::= { loginterface 13 }
 
+
+-- source-track
+
+count OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of entries in the source tracking table."
+    ::= { source-track 1 }
+
+searches OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of searches against the source tracking table."
+    ::= { source-track 2 }
+
+inserts OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of inserts into the source tracking table."
+    ::= { source-track 3 }
+
+removals OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of removals from the source tracking table."
+    ::= { source-track 4 }
 
 
 -- END:  Don't forget this!
