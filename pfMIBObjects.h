@@ -21,6 +21,7 @@
 #ifndef _MIBGROUP_PFMIBOBJECTS_H
 #define _MIBGROUP_PFMIBOBJECTS_H
 
+#include <sys/socket.h>
 
 #include <netinet/in.h>
 #include <net/if.h>
