@@ -70,6 +70,26 @@ pfMIBObjects MODULE-IDENTITY
 --			states(1)
 --			src-nodes(2)
 --			fragments(3)
+--		timeouts(7)
+--			tcpFirst(1)
+--			tcpOpening(2)
+--			tcpEstablished(3)
+--			tcpClosing(4)
+--			tcpFinwait(5)
+--			tcpClosed(6)
+--			udpFirst(7)
+--			udpSingle(8)
+--			udpMultiple(9)
+--			icmpFirst(10)
+--			icmpError(11)
+--			otherFirst(12)
+--			otherSingle(13)
+--			otherMultiple(14)
+--			fragment(15)
+--			interval(16)
+--			adaptiveStart(17)
+--			adaptiveEnd(18)
+--			sourceTrack(19)
 
 
 -- define the sections of the MIB
@@ -80,6 +100,7 @@ state-table			OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
 loginterface			OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
 source-track			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
 limits				OBJECT IDENTIFIER ::= { pfMIBObjects 6 }
+timeouts			OBJECT IDENTIFIER ::= { pfMIBObjects 7 }
 
 
 -- info
@@ -376,6 +397,169 @@ fragments OBJECT-TYPE
 	"The maximum number of entries in the memory pool used for packet 
 	reassembly (scrub rules)."
 	::= { limits 3 }
+
+
+-- timeouts
+
+tcpFirst OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after receiving the first TCP packet in a new connection."
+	::= { timeouts 1 }
+
+tcpOpening OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State before the destination host ever sends a packet in response
+	to a new connection from this host."
+	::= { timeouts 2 }
+
+tcpEstablished OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State when a TCP connection is fully established."
+	::= { timeouts 3 }
+
+tcpClosing OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after the first FIN has been sent."
+	::= { timeouts 4 }
+
+tcpFinwait OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after both FINs are sent and the connection is closed."
+	::= { timeouts 5 }
+
+tcpClosed OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after the first RST has been sent."
+	::= { timeouts 6 }
+
+udpFirst OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after receiving the first UDP packet."
+	::= { timeouts 7 }
+
+udpSingle OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State if the source sends more than 1 packet but the destination
+	has never sent a packet back."
+	::= { timeouts 8 }
+
+udpMultiple OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State when both hosts have sent packets."
+	::= { timeouts 9 }
+
+icmpFirst OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after receiving the first ICMP packet."
+	::= { timeouts 10 }
+
+icmpError OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State when an ICMP error comes back in response to an ICMP
+	packet."
+	::= { timeouts 11 }
+
+otherFirst OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State after receiving the first packet."
+	::= { timeouts 12 }
+
+otherSingle OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State if the source sends more than 1 packet but the destination
+	has never sent a packet back."
+	::= { timeouts 13 }
+
+otherMultiple OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"State when both hosts have sent packets."
+	::= { timeouts 14 }
+
+fragment OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"How long before an unassembled fragment is expired."
+	::= { timeouts 15 }
+
+interval OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Interval before purging expired states and fragments."
+	::= { timeouts 16 }
+
+adaptiveStart OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"When the number of state entries exceeds this value, adaptive
+	scaling begins."
+	::= { timeouts 17 }
+
+adaptiveEnd OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"When reaching this number of state entries, all timeout values 
+	become zero, effectively purging all state entries immediately."
+	::= { timeouts 18 }
+
+sourceTrack OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Time that a source tracking entry will stay around after the
+	last state expires."
+	::= { timeouts 19 }
+
 
 -- END:  Don't forget this!
 END

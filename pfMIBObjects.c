@@ -66,6 +66,25 @@ struct variable2 pfMIBObjects_variables[] = {
   { LIMIT_STATES        , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,1 } },
   { LIMIT_SRC_NODES     , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,2 } },
   { LIMIT_FRAGS         , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,3 } },
+  { TM_TCP_FIRST        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,1 } },
+  { TM_TCP_OPENING      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,2 } },
+  { TM_TCP_ESTAB        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,3 } },
+  { TM_TCP_CLOSING      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,4 } },
+  { TM_TCP_FINWAIT      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,5 } },
+  { TM_TCP_CLOSED       , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,6 } },
+  { TM_UDP_FIRST        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,7 } },
+  { TM_UDP_SINGLE       , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,8 } },
+  { TM_UDP_MULTIPLE     , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,9 } },
+  { TM_ICMP_FIRST       , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,10 } },
+  { TM_ICMP_ERROR       , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,11 } },
+  { TM_OTHER_FIRST      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,12 } },
+  { TM_OTHER_SINGLE     , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,13 } },
+  { TM_OTHER_MULTIPLE   , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,14 } },
+  { TM_FRAGMENT         , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,15 } },
+  { TM_INTERVAL         , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,16 } },
+  { TM_ADAPT_START      , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,17 } },
+  { TM_ADAPT_END        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,18 } },
+  { TM_SRC_TRACK        , ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,19 } },
 };
 /*    (L = length of the oidsuffix) */
 
@@ -340,4 +359,110 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 	return NULL;
 }
 
+unsigned char *
+var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfioc_tm pt;
+
+	static long long_ret;
+
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+			== MATCH_FAILED)
+		return NULL;
+
+	if (dev == -1)
+		return NULL;
+
+	memset(&pt, 0, sizeof(pt));
+	switch(vp->magic) {
+
+		case TM_TCP_FIRST:
+			pt.timeout = PFTM_TCP_FIRST_PACKET;
+			break;
+
+		case TM_TCP_OPENING:
+			pt.timeout = PFTM_TCP_OPENING;
+			break;
+
+		case TM_TCP_ESTAB:
+			pt.timeout = PFTM_TCP_ESTABLISHED;
+			break;
+
+		case TM_TCP_CLOSING:
+			pt.timeout = PFTM_TCP_CLOSING;
+			break;
+
+		case TM_TCP_FINWAIT:
+			pt.timeout = PFTM_TCP_FIN_WAIT;
+			break;
+
+		case TM_TCP_CLOSED:
+			pt.timeout = PFTM_TCP_CLOSED;
+			break;
+
+		case TM_UDP_FIRST:
+			pt.timeout = PFTM_UDP_FIRST_PACKET;
+			break;
+
+		case TM_UDP_SINGLE:
+			pt.timeout = PFTM_UDP_SINGLE;
+			break;
+
+		case TM_UDP_MULTIPLE:
+			pt.timeout = PFTM_UDP_MULTIPLE;
+			break;
+
+		case TM_ICMP_FIRST:
+			pt.timeout = PFTM_ICMP_FIRST_PACKET;
+			break;
+
+		case TM_ICMP_ERROR:
+			pt.timeout = PFTM_ICMP_ERROR_REPLY;
+			break;
+
+		case TM_OTHER_FIRST:
+			pt.timeout = PFTM_OTHER_FIRST_PACKET;
+			break;
+
+		case TM_OTHER_SINGLE:
+			pt.timeout = PFTM_OTHER_SINGLE;
+			break;
+
+		case TM_OTHER_MULTIPLE:
+			pt.timeout = PFTM_OTHER_MULTIPLE;
+			break;
+
+		case TM_FRAGMENT:
+			pt.timeout = PFTM_FRAG;
+			break;
+
+		case TM_INTERVAL:
+			pt.timeout = PFTM_INTERVAL;
+			break;
+
+		case TM_ADAPT_START:
+			pt.timeout = PFTM_ADAPTIVE_START;
+			break;
+
+		case TM_ADAPT_END:
+			pt.timeout = PFTM_ADAPTIVE_END;
+			break;
+
+		case TM_SRC_TRACK:
+			pt.timeout = PFTM_SRC_NODE;
+			break;
+
+		default:
+			ERROR_MSG("");
+			return NULL;
+	}
+
+	if (ioctl(dev, DIOCGETTIMEOUT, &pt)) {
+		ERROR_MSG("ioctl error doing DIOCGETTIMEOUT");
+		return NULL;
+	}
+	long_ret = pt.seconds;
+	return (unsigned char *) &long_ret;
+}
 
