@@ -591,12 +591,12 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 	if (dev == -1)
 		return (NULL);
 
+	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
+		pfi_refresh();
+
 	index = name[*length-1]-1;
 	if (!pfi_table[index])
 		return (NULL);
-
-	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
-		pfi_refresh();
 
 	if (pfi_get(&b, (const char *)&pfi_table[index], PFI_FLAG_INSTANCE) 
 			|| b.pfrb_size == 0) {
