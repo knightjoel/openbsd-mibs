@@ -8,7 +8,7 @@ IMPORTS
 	TruthValue
 		FROM SNMPv2-TC
 		
-	OpenBSD
+	openBSD
 		FROM OPENBSD-BASE-MIB
 	
 	MODULE-COMPLIANCE, OBJECT-GROUP
@@ -24,7 +24,7 @@ pfMIBObjects MODULE-IDENTITY
     DESCRIPTION "The MIB module for gathering information from
 		OpenBSD's packet filter.
                 "
-    ::= { OpenBSD 1 }
+    ::= { openBSD 1 }
 
 
 -- An overview of this MIB module:
