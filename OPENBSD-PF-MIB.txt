@@ -42,7 +42,7 @@ pfMIBObjects MODULE-IDENTITY
 --			short(4)
 --			normalize(5)
 --			memory(6)
---		states(3)
+--		state-table(3)
 --			count(1)
 --			searches(2)
 --			inserts(3)
@@ -72,7 +72,7 @@ pfMIBObjects MODULE-IDENTITY
 
 info				OBJECT IDENTIFIER ::= { pfMIBObjects 1 }
 counters			OBJECT IDENTIFIER ::= { pfMIBObjects 2 }
-states				OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
+state-table			OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
 loginterface			OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
 source-track			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
 
@@ -165,7 +165,7 @@ memory OBJECT-TYPE
     ::= { counters 6 }
 
 
--- states
+-- state-table
 
 count OBJECT-TYPE
     SYNTAX      Unsigned32
@@ -173,7 +173,7 @@ count OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of entries in the state table."
-    ::= { states 1 }
+    ::= { state-table 1 }
 
 searches OBJECT-TYPE
     SYNTAX      Counter64
@@ -181,7 +181,7 @@ searches OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of searches against the state table."
-    ::= { states 2 }
+    ::= { state-table 2 }
 
 inserts OBJECT-TYPE
     SYNTAX      Counter64
@@ -189,7 +189,7 @@ inserts OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of inserts into the state table."
-    ::= { states 3 }
+    ::= { state-table 3 }
 
 removals OBJECT-TYPE
     SYNTAX      Counter64
@@ -197,7 +197,7 @@ removals OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"The number of removals from the state table."
-    ::= { states 4 }
+    ::= { state-table 4 }
 
 
 -- loginterface
