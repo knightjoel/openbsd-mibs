@@ -68,7 +68,7 @@ void init_OpenBSD(void) {
 			OpenBSD_variables_oid);
 
 	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
-		ERROR_MSG("Could not open /dev/pf: %s");
+		ERROR_MSG("Could not open /dev/pf");
 }
 
 unsigned char *
