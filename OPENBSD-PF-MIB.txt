@@ -75,7 +75,7 @@ pfMIBObjects MODULE-IDENTITY
 --			tcpOpening(2)
 --			tcpEstablished(3)
 --			tcpClosing(4)
---			tcpFinwait(5)
+--			tcpFinWait(5)
 --			tcpClosed(6)
 --			udpFirst(7)
 --			udpSingle(8)
@@ -437,7 +437,7 @@ tcpClosing OBJECT-TYPE
 	"State after the first FIN has been sent."
 	::= { timeouts 4 }
 
-tcpFinwait OBJECT-TYPE
+tcpFinWait OBJECT-TYPE
 	SYNTAX		Integer32
 	MAX-ACCESS	read-only
 	STATUS		current
