@@ -117,38 +117,38 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) string;
 
 		case MATCH:
-			c64.high = s.counters[0] >> 32;
-			c64.low = s.counters[0] & 0xffffffff;
+			c64.high = s.counters[PFRES_MATCH] >> 32;
+			c64.low = s.counters[PFRES_MATCH] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case BADOFFSET:
-			c64.high = s.counters[1] >> 32;
-			c64.low = s.counters[1] & 0xffffffff;
+			c64.high = s.counters[PFRES_BADOFF] >> 32;
+			c64.low = s.counters[PFRES_BADOFF] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case FRAGMENT:
-			c64.high = s.counters[2] >> 32;
-			c64.low = s.counters[2] & 0xffffffff;
+			c64.high = s.counters[PFRES_FRAG] >> 32;
+			c64.low = s.counters[PFRES_FRAG] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case SHORT:
-			c64.high = s.counters[3] >> 32;
-			c64.low = s.counters[3] & 0xffffffff;
+			c64.high = s.counters[PFRES_SHORT] >> 32;
+			c64.low = s.counters[PFRES_SHORT] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case NORMALIZE:
-			c64.high = s.counters[4] >> 32;
-			c64.low = s.counters[4] & 0xffffffff;
+			c64.high = s.counters[PFRES_NORM] >> 32;
+			c64.low = s.counters[PFRES_NORM] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case MEMORY:
-			c64.high = s.counters[5] >> 32;
-			c64.low = s.counters[5] & 0xffffffff;
+			c64.high = s.counters[PFRES_MEMORY] >> 32;
+			c64.low = s.counters[PFRES_MEMORY] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
@@ -157,20 +157,20 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &ulong_ret;
 
 		case SEARCHES:
-			c64.high = s.fcounters[0] >> 32;
-			c64.low = s.fcounters[0] & 0xffffffff;
+			c64.high = s.fcounters[FCNT_STATE_SEARCH] >> 32;
+			c64.low = s.fcounters[FCNT_STATE_SEARCH] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case INSERTS:
-			c64.high = s.fcounters[1] >> 32;
-			c64.low = s.fcounters[1] & 0xffffffff;
+			c64.high = s.fcounters[FCNT_STATE_INSERT] >> 32;
+			c64.low = s.fcounters[FCNT_STATE_INSERT] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case REMOVALS:
-			c64.high = s.fcounters[2] >> 32;
-			c64.low = s.fcounters[2] & 0xffffffff;
+			c64.high = s.fcounters[FCNT_STATE_REMOVALS] >> 32;
+			c64.low = s.fcounters[FCNT_STATE_REMOVALS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
