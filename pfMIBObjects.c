@@ -736,7 +736,7 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 			
 		default:
-			ERROR_MSG("");
+			free(b.pfrb_caddr);
 			return (NULL);
 	}
 	
@@ -882,6 +882,7 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 
 		default:
+			free(b.pfrb_caddr);
 			return (NULL);
 	}
 
