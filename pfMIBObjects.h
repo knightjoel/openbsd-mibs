@@ -39,6 +39,9 @@
 #define SRCTRACK_SEARCHES     29
 #define SRCTRACK_INSERTS      30
 #define SRCTRACK_REMOVALS     31
+#define LIMIT_STATES          32
+#define LIMIT_SRC_NODES       33
+#define LIMIT_FRAGS           34
 
 
 config_require(util_funcs)
@@ -46,8 +49,9 @@ config_require(util_funcs)
 
 /* function prototypes */
 void   init_pfMIBObjects(void);
-FindVarMethod var_pfMIBObjects;
 
+FindVarMethod var_limits;
+FindVarMethod var_pfMIBObjects;
 
 
 #endif /* _MIBGROUP_PFMIBOBJECTS_H */

@@ -66,6 +66,10 @@ pfMIBObjects MODULE-IDENTITY
 --			searches(2)
 --			inserts(3)
 --			removals(4)
+--		limits(6)
+--			states(1)
+--			src-nodes(2)
+--			fragments(3)
 
 
 -- define the sections of the MIB
@@ -75,6 +79,7 @@ counters			OBJECT IDENTIFIER ::= { pfMIBObjects 2 }
 state-table			OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
 loginterface			OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
 source-track			OBJECT IDENTIFIER ::= { pfMIBObjects 5 }
+limits				OBJECT IDENTIFIER ::= { pfMIBObjects 6 }
 
 
 -- info
@@ -341,6 +346,36 @@ removals OBJECT-TYPE
 	"The number of removals from the source tracking table."
     ::= { source-track 4 }
 
+
+-- limits
+
+states OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The maximum number of entries in the memory pool used by state
+	table entries (filter rules that specify 'keep state')."
+	::= { limits 1 }
+
+source-nodes OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The maximum number of entries in the memory pool used for tracking
+	source IP addresses (filter rules that specify 'sticky-address' or
+	'source-track' options)."
+	::= { limits 2 }
+
+fragments OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The maximum number of entries in the memory pool used for packet 
+	reassembly (scrub rules)."
+	::= { limits 3 }
 
 -- END:  Don't forget this!
 END

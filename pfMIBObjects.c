@@ -63,6 +63,9 @@ struct variable2 pfMIBObjects_variables[] = {
   { SRCTRACK_SEARCHES   , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,2 } },
   { SRCTRACK_INSERTS    , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,2 } },
   { SRCTRACK_REMOVALS   , ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 5,4 } },
+  { LIMIT_STATES        , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,1 } },
+  { LIMIT_SRC_NODES     , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,2 } },
+  { LIMIT_FRAGS         , ASN_UNSIGNED  , RONLY , var_limits, 2, { 6,3 } },
 };
 /*    (L = length of the oidsuffix) */
 
@@ -73,6 +76,58 @@ void init_pfMIBObjects(void) {
 
 	if ((dev = open("/dev/pf", O_RDONLY)) == -1) 
 		ERROR_MSG("Could not open /dev/pf");
+}
+
+unsigned char *
+var_limits(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfioc_limit pl;
+	
+	static u_long ulong_ret;
+
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+			== MATCH_FAILED )
+		return NULL;
+
+	if (dev == -1)
+		return NULL;
+
+	switch(vp->magic) {
+
+		case LIMIT_STATES:
+			pl.index = PF_LIMIT_STATES;
+			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
+				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
+				return NULL;
+			}
+			ulong_ret = pl.limit;
+			return (unsigned char *) &ulong_ret;
+
+		case LIMIT_SRC_NODES:
+			pl.index = PF_LIMIT_SRC_NODES;
+			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
+				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
+				return NULL;
+			}
+			ulong_ret = pl.limit;
+			return (unsigned char *) &ulong_ret;
+
+		case LIMIT_FRAGS:
+			pl.index = PF_LIMIT_FRAGS;
+			if (ioctl(dev, DIOCGETLIMIT, &pl)) {
+				ERROR_MSG("ioctl error doing DIOCGETLIMIT");
+				return NULL;
+			}
+			ulong_ret = pl.limit;
+			return (unsigned char *) &ulong_ret;
+						
+		default:
+			ERROR_MSG("");
+
+	}
+
+	return NULL;
 }
 
 unsigned char *
