@@ -1,0 +1,311 @@
+OPENBSD-PF-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, 
+	Counter32, Counter64, IpAddress, enterprises
+		FROM SNMPv2-SMI
+
+	TruthValue
+		FROM SNMPv2-TC
+		
+	MODULE-COMPLIANCE, OBJECT-GROUP
+		FROM SNMPv2-CONF;
+
+OpenBSD MODULE-IDENTITY
+    LAST-UPDATED "0403240000Z"
+    ORGANIZATION "OpenBSD"
+    CONTACT-INFO "
+                  Author:     Joel Knight
+                  email:      enabled@myrealbox.com
+                 "
+    DESCRIPTION "The MIB module for gathering information from
+				OpenBSD's packet filter.
+                "
+-- FIXME: http://www.iana.org/assignments/smi-numbers
+    ::= { enterprises 64512 }
+
+
+-- An overview of this MIB module:
+--
+--	OpenBSD(64512)
+--		pfMIBObjects(1)
+--			info(1)
+--				running(1)
+--				uptime(2)
+--				debug(3)
+--				hostid(4)
+--			counters(2)
+--				match(1)
+--				bad-offset(2)
+--				fragment(3)
+--				short(4)
+--				normalize(5)
+--				memory(6)
+--			states(3)
+--				count(1)
+--				searches(2)
+--				inserts(3)
+--				removals(4)
+--			loginterface(4)
+--				name(1)
+--				ipBytesIn(2)
+--				ipBytesOut(3)
+--				ipPktsInPass(4)
+--				ipPktsInDrop(5)
+--				ipPktsOutPass(6)
+--				ipPktsOutDrop(7)
+--				ip6BytesIn(8)
+--				ip6BytesOut(9)
+--				ip6PktsInPass(10)
+--				ip6PktsInDrop(11)
+--				ip6PktsOutPass(12)
+--				ip6PktsOutDrop(13)
+
+
+-- define MIB objects
+
+pfMIBObjects				OBJECT IDENTIFIER ::= { OpenBSD 1 }
+
+-- define the sections of the MIB
+
+info						OBJECT IDENTIFIER ::= { pfMIBObjects 1 }
+counters					OBJECT IDENTIFIER ::= { pfMIBObjects 2 }
+states						OBJECT IDENTIFIER ::= { pfMIBObjects 3 }
+loginterface				OBJECT IDENTIFIER ::= { pfMIBObjects 4 }
+
+
+-- info
+
+running OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"Indicates whether pf is enabled or not. This is a boolean value."
+    ::= { info 1 }
+
+uptime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    UNITS      "1/100th of a Second"
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"Indicates in seconds how long pf has been enabled. If pf is not
+	enabled, this object will be 0."
+    ::= { info 2 }
+
+debug OBJECT-TYPE
+    SYNTAX      INTEGER (0..255)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"Indicates the debug level that pf is running at. 0 = none; 1 =
+	urgent; 2 = misc; 3 = noisey."
+    ::= { info 3 }
+
+hostid OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The (unique) host id of the machine running pf."
+    ::= { info 4 }
+
+
+-- counters
+
+match OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that have matched a filter rule."
+    ::= { counters 1 }
+
+bad-offset OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that have had a bad offset value."
+    ::= { counters 2 }
+
+fragment OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packet fragments."
+    ::= { counters 3 }
+
+short OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were too short to contain a valid header."
+    ::= { counters 4 }
+
+normalize OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were normalized using the packet scrubber."
+    ::= { counters 5 }
+
+memory OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to memory limitations."
+    ::= { counters 6 }
+
+
+-- states
+
+count OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of entries in the state table."
+    ::= { states 1 }
+
+searches OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of searches against the state table.."
+    ::= { states 2 }
+
+inserts OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of inserts into the state table."
+    ::= { states 3 }
+
+removals OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of removals from the state table."
+    ::= { states 4 }
+
+
+-- loginterface
+
+name OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The interface configured using 'set loginterface'."
+    ::= { loginterface 1 }
+
+ipBytesIn OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv4 bytes passed in on the loginterface."
+    ::= { loginterface 2 }
+
+ipBytesOut OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv4 bytes passed out on the loginterface."
+    ::= { loginterface 3 }
+
+ipPktsInPass OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv4 packets passed in on the loginterface."
+    ::= { loginterface 4 }
+
+ipPktsInDrop OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of dropped IPv4 packets coming in on the loginterface."
+    ::= { loginterface 5 }
+
+ipPktsOutPass OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv4 packets passed out on the loginterface."
+    ::= { loginterface 6 }
+
+ipPktsOutDrop OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of dropped IPv4 packets going out on the loginterface."
+    ::= { loginterface 7 }
+
+ip6BytesIn OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv6 bytes passed in on the loginterface."
+    ::= { loginterface 8 }
+
+ip6BytesOut OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv6 bytes passed out on the loginterface."
+    ::= { loginterface 9 }
+
+ip6PktsInPass OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv6 packets passed in on the loginterface."
+    ::= { loginterface 10 }
+
+ip6PktsInDrop OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of dropped IPv6 packets coming in on the loginterface."
+    ::= { loginterface 11 }
+
+ip6PktsOutPass OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of IPv6 packets passed out on the loginterface."
+    ::= { loginterface 12 }
+
+ip6PktsOutDrop OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of dropped IPv6 packets going out on the loginterface."
+    ::= { loginterface 13 }
+
+
+
+-- END:  Don't forget this!
+END
+
