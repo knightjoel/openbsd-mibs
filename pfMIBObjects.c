@@ -114,8 +114,8 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) string;
 
 		case MATCH:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[0] >> 32;
+			c64.low = s.counters[0] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
