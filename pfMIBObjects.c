@@ -23,6 +23,8 @@
 #include "util_funcs.h"
 #include "OpenBSD.h"
 
+enum { IN, OUT };
+enum { IPV4, IPV6 };
 
 int dev = -1;
 oid OpenBSD_variables_oid[] = { 1,3,6,1,4,1,64512 };
@@ -120,32 +122,32 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &c64;
 
 		case BADOFFSET:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[1] >> 32;
+			c64.low = s.counters[1] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case FRAGMENT:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[2] >> 32;
+			c64.low = s.counters[2] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case SHORT:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[3] >> 32;
+			c64.low = s.counters[3] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case NORMALIZE:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[4] >> 32;
+			c64.low = s.counters[4] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case MEMORY:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.counters[5] >> 32;
+			c64.low = s.counters[5] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
@@ -154,20 +156,20 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &ulong_ret;
 
 		case SEARCHES:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.fcounters[0] >> 32;
+			c64.low = s.fcounters[0] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case INSERTS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.fcounters[1] >> 32;
+			c64.low = s.fcounters[1] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case REMOVALS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.fcounters[2] >> 32;
+			c64.low = s.fcounters[2] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
@@ -177,74 +179,74 @@ var_OpenBSD(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) string;
 
 		case IPBYTESIN:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.bcounters[IPV4][IN] >> 32;
+			c64.low = s.bcounters[IPV4][IN] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IPBYTESOUT:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.bcounters[IPV4][OUT] >> 32;
+			c64.low = s.bcounters[IPV4][OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IPPKTSINPASS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV4][IN][PF_PASS] >> 32;
+			c64.low = s.pcounters[IPV4][IN][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IPPKTSINDROP:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV4][IN][PF_DROP] >> 32;
+			c64.low = s.pcounters[IPV4][IN][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IPPKTSOUTPASS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV4][OUT][PF_PASS] >> 32;
+			c64.low = s.pcounters[IPV4][OUT][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IPPKTSOUTDROP:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV4][OUT][PF_DROP] >> 32;
+			c64.low = s.pcounters[IPV4][OUT][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6BYTESIN:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.bcounters[IPV6][IN] >> 32;
+			c64.low = s.bcounters[IPV6][IN] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6BYTESOUT:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.bcounters[IPV6][OUT] >> 32;
+			c64.low = s.bcounters[IPV6][OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6PKTSINPASS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV6][IN][PF_PASS] >> 32;
+			c64.low = s.pcounters[IPV6][IN][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6PKTSINDROP:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV6][IN][PF_DROP] >> 32;
+			c64.low = s.pcounters[IPV6][IN][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6PKTSOUTPASS:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV6][OUT][PF_PASS] >> 32;
+			c64.low = s.pcounters[IPV6][OUT][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
 		case IP6PKTSOUTDROP:
-			c64.high = 0;
-			c64.low = 0;
+			c64.high = s.pcounters[IPV6][OUT][PF_DROP] >> 32;
+			c64.low = s.pcounters[IPV6][OUT][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
