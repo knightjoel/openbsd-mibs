@@ -770,6 +770,7 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 		return (NULL);
 	}
 
+	pft_refresh(); 
 	if (header_simple_table(vp, name, length, exact, var_len, write_method, pft_count)
 			== MATCH_FAILED) {
 		free(b.pfrb_caddr);
