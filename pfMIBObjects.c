@@ -23,10 +23,21 @@
 #include "util_funcs.h"
 #include "pfMIBObjects.h"
 
+
+#define PFRB_FOREACH(var, buf)				\
+	for ((var) = pfr_buf_next((buf), NULL);		\
+	    (var) != NULL;				\
+	    (var) = pfr_buf_next((buf), (var)))
+
 int	dev = -1;
 char *pfi_table[255][255];
 unsigned int pfi_count;
+unsigned int pft_count;
 time_t pfi_table_age;
+
+size_t buf_esize[PFRB_MAX] = { 0,
+	sizeof(struct pfr_tstats), sizeof(struct pfi_if)
+};
 
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
 
@@ -82,10 +93,10 @@ struct variable4 pfMIBObjects_variables[] = {
   { TM_OTHER_MULTIPLE	, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,14 } },
   { TM_FRAGMENT		, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,15 } },
   { TM_INTERVAL		, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,16 } },
-  { TM_ADAPT_STAR	, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,17 } },
+  { TM_ADAPT_START	, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,17 } },
   { TM_ADAPT_END	, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,18 } },
   { TM_SRC_TRACK	, ASN_INTEGER   , RONLY , var_timeouts, 2, { 7,19 } },
-  { PF_IFNUMBER		, ASN_INTEGER   , RONLY , var_if_number, 2, { 8,1 } },
+  { PF_IFNUMBER		, ASN_INTEGER   , RONLY , var_table_number, 2, { 8,1 } },
   { PF_IFINDEX		, ASN_INTEGER   , RONLY , var_if_table, 4, { 8,128,1,1 } },
   { PF_IFNAME		, ASN_OCTET_STR , RONLY , var_if_table, 4, { 8,128,1,2 } },
   { PF_IFTYPE		, ASN_INTEGER   , RONLY , var_if_table, 4, { 8,128,1,3 } },
@@ -98,7 +109,7 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_IFOUT4PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,10 } },
   { PF_IFOUT4PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,11 } },
   { PF_IFOUT4BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,12 } },
-  { PF_IFOUT4BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,13 } },
+  { PF_IFOUT4BLOCKBYTES , ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,13 } },
   { PF_IFIN6PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,14 } },
   { PF_IFIN6PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,15 } },
   { PF_IFIN6BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,16 } },
@@ -106,7 +117,27 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_IFOUT6PASSPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,18 } },
   { PF_IFOUT6PASSBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,19 } },
   { PF_IFOUT6BLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,20 } },
-  { PF_IFOUT6BLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,21 } },
+  { PF_IFOUT6BLOCKBYTES , ASN_COUNTER64	, RONLY	, var_if_table, 4, { 8,128,1,21 } },
+  { PF_TANUMBER		, ASN_INTEGER	, RONLY	, var_table_number, 2, { 9,1 } },
+  { PF_TAINDEX		, ASN_INTEGER	, RONLY	, var_tables_table, 4, { 9,128,1,1 } },
+  { PF_TANAME		, ASN_OCTET_STR	, RONLY	, var_tables_table, 4, { 9,128,1,2 } },
+  { PF_TAADDRESSES	, ASN_INTEGER	, RONLY	, var_tables_table, 4, { 9,128,1,3 } },
+  { PF_TAANCHORREFS	, ASN_INTEGER	, RONLY	, var_tables_table, 4, { 9,128,1,4 } },
+  { PF_TARULEREFS	, ASN_INTEGER	, RONLY	, var_tables_table, 4, { 9,128,1,5 } },
+  { PF_TAEVALSMATCH	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,6 } },
+  { PF_TAEVALSNOMATCH	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,7 } },
+  { PF_TAINPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,8 } },
+  { PF_TAINPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,9 } },
+  { PF_TAINBLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,10 } },
+  { PF_TAINBLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,11 } },
+  { PF_TAINXPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,12 } },
+  { PF_TAINXPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,13 } },
+  { PF_TAOUTPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,14 } },
+  { PF_TAOUTPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,15 } },
+  { PF_TAOUTBLOCKPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,16 } },
+  { PF_TAOUTBLOCKBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,17 } },
+  { PF_TAOUTXPASSPKTS	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,18 } },
+  { PF_TAOUTXPASSBYTES	, ASN_COUNTER64	, RONLY	, var_tables_table, 4, { 9,128,1,19 } },
 };
 
 
@@ -120,6 +151,7 @@ void init_pfMIBObjects(void) {
 	bzero(&pfi_table, sizeof(pfi_table));
 	pfi_count = 0;
 	pfi_refresh();
+	pft_refresh();
 }
 
 unsigned char *
@@ -486,7 +518,7 @@ var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
 }
 
 unsigned char *
-var_if_number(struct variable *vp, oid *name, size_t *length, int exact,
+var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
 	static u_long ulong_ret;
@@ -501,6 +533,11 @@ var_if_number(struct variable *vp, oid *name, size_t *length, int exact,
 	switch (vp->magic) {
 		case PF_IFNUMBER:
 			ulong_ret = pfi_count;
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TANUMBER:
+			pft_refresh();
+			ulong_ret = pft_count;
 			return (unsigned char *) &ulong_ret;
 		
 		default:
@@ -681,15 +718,179 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 	return (unsigned char *) &c64;
 }
 
+unsigned char *
+var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfr_buffer b;
+	struct pfr_tstats *ts = NULL;
+	static struct counter64 c64;
+	static u_long ulong_ret;
+	int index, i = 0;
+
+	if (dev == -1)
+		return (NULL);
+	
+	if (pft_get(&b) || b.pfrb_size == 0) {
+		ERROR_MSG("error getting table list: pft_get() failed");
+		return (NULL);
+	}
+
+	if (header_simple_table(vp, name, length, exact, var_len, write_method, pft_count)
+			== MATCH_FAILED) {
+		free(b.pfrb_caddr);
+		return (NULL);
+	}
+
+	index = name[*length-1];
+
+	PFRB_FOREACH(ts, &b)
+		if (++i == index)
+			break;
+
+	if (ts == NULL) {
+		free(b.pfrb_caddr);
+		return (NULL);
+	}
+
+	switch (vp->magic) {
+		case PF_TAINDEX:
+			ulong_ret = index;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TANAME:
+			*var_len = strlen(ts->pfrts_t.pfrt_name);
+			free(b.pfrb_caddr);
+			return (unsigned char *) ts->pfrts_t.pfrt_name;
+
+		case PF_TAADDRESSES:
+			ulong_ret = ts->pfrts_cnt;
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TAANCHORREFS:
+			ulong_ret = ts->pfrts_refcnt[PFR_REFCNT_ANCHOR];
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TARULEREFS:
+			ulong_ret = ts->pfrts_refcnt[PFR_REFCNT_RULE];
+			free(b.pfrb_caddr);
+			return (unsigned char *) &ulong_ret;
+
+		case PF_TAEVALSMATCH:
+			c64.high = ts->pfrts_match >> 32;
+			c64.low = ts->pfrts_match & 0xffffffff;
+			break;
+
+		case PF_TAEVALSNOMATCH:
+			c64.high = ts->pfrts_nomatch >> 32;
+			c64.low = ts->pfrts_nomatch & 0xffffffff;
+			break;
+
+		case PF_TAINPASSPKTS:
+			c64.high = ts->pfrts_packets[IN][PFR_OP_PASS] >> 32;
+			c64.low = ts->pfrts_packets[IN][PFR_OP_PASS] & 0xffffffff;
+			break;
+
+		case PF_TAINPASSBYTES:
+			c64.high = ts->pfrts_bytes[IN][PFR_OP_PASS] >> 32;
+			c64.low = ts->pfrts_bytes[IN][PFR_OP_PASS] & 0xffffffff;
+			break;
+
+		case PF_TAINBLOCKPKTS:
+			c64.high = ts->pfrts_packets[IN][PFR_OP_BLOCK] >> 32;
+			c64.low = ts->pfrts_packets[IN][PFR_OP_BLOCK] & 0xffffffff;
+			break;
+
+		case PF_TAINBLOCKBYTES:
+			c64.high = ts->pfrts_bytes[IN][PFR_OP_BLOCK] >> 32;
+			c64.low = ts->pfrts_bytes[IN][PFR_OP_BLOCK] & 0xffffffff;
+			break;
+
+		case PF_TAINXPASSPKTS:
+			c64.high = ts->pfrts_packets[IN][PFR_OP_XPASS] >> 32;
+			c64.low = ts->pfrts_packets[IN][PFR_OP_XPASS] & 0xffffffff;
+			break;
+
+		case PF_TAINXPASSBYTES:
+			c64.high = ts->pfrts_bytes[IN][PFR_OP_XPASS] >> 32;
+			c64.low = ts->pfrts_bytes[IN][PFR_OP_XPASS] & 0xffffffff;
+			break;
+
+		case PF_TAOUTPASSPKTS:
+			c64.high = ts->pfrts_packets[OUT][PFR_OP_PASS] >> 32;
+			c64.low = ts->pfrts_packets[OUT][PFR_OP_PASS] & 0xffffffff;
+			break;
+
+		case PF_TAOUTPASSBYTES:
+			c64.high = ts->pfrts_bytes[OUT][PFR_OP_PASS] >> 32;
+			c64.low = ts->pfrts_bytes[OUT][PFR_OP_PASS] & 0xffffffff;
+			break;
+
+		case PF_TAOUTBLOCKPKTS:
+			c64.high = ts->pfrts_packets[OUT][PFR_OP_BLOCK] >> 32;
+			c64.low = ts->pfrts_packets[OUT][PFR_OP_BLOCK] & 0xffffffff;
+			break;
+
+		case PF_TAOUTBLOCKBYTES:
+			c64.high = ts->pfrts_bytes[OUT][PFR_OP_BLOCK] >> 32;
+			c64.low = ts->pfrts_bytes[OUT][PFR_OP_BLOCK] & 0xffffffff;
+			break;
+
+		case PF_TAOUTXPASSPKTS:
+			c64.high = ts->pfrts_packets[OUT][PFR_OP_XPASS] >> 32;
+			c64.low = ts->pfrts_packets[OUT][PFR_OP_XPASS] & 0xffffffff;
+			break;
+
+		case PF_TAOUTXPASSBYTES:
+			c64.high = ts->pfrts_bytes[OUT][PFR_OP_XPASS] >> 32;
+			c64.low = ts->pfrts_bytes[OUT][PFR_OP_XPASS] & 0xffffffff;
+			break;
+
+		default:
+			return (NULL);
+	}
+
+	free(b.pfrb_caddr);
+	*var_len = sizeof(c64);
+	return (unsigned char *) &c64;
+}
+
 int
 pfi_get(struct pfr_buffer *b, const char *filter, int flags)
 {
 	bzero(b, sizeof(struct pfr_buffer));
+	b->pfrb_type = PFRB_IFACES;
 	for (;;) {
 		pfr_buf_grow(b, b->pfrb_size);
 		b->pfrb_size = b->pfrb_msize;
 		if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size), flags)) {
 			ERROR_MSG("pfi_get_ifaces() failed");
+			return (1);
+		}
+		if (b->pfrb_size <= b->pfrb_msize)
+			break;
+	}
+
+	return (0);
+}
+
+int
+pft_get(struct pfr_buffer *b)
+{
+	struct pfr_table filter;
+    
+	bzero(b, sizeof(struct pfr_buffer));
+	bzero(&filter, sizeof(filter));
+	b->pfrb_type = PFRB_TSTATS;
+	
+	for (;;) {
+		pfr_buf_grow(b, b->pfrb_size);
+		b->pfrb_size = b->pfrb_msize;
+		if (pfr_get_tstats(&filter, b->pfrb_caddr, &(b->pfrb_size), 0)) {
+			ERROR_MSG("pft_get_tstats() failed");
 			return (1);
 		}
 		if (b->pfrb_size <= b->pfrb_msize)
@@ -729,6 +930,27 @@ pfi_refresh(void)
 	return (0);
 }
 
+
+int
+pft_refresh(void)
+{
+	struct pfr_buffer b;
+	struct pfr_tstats *ts = NULL;
+
+	if (pft_get(&b)) {
+		ERROR_MSG("Could not get list of tables");
+		return (1);
+	}
+
+	pft_count = 0;
+	PFRB_FOREACH(ts, &b)
+		pft_count++;
+
+	free(b.pfrb_caddr);
+
+	return (0);
+}
+
 /* the following code taken from pfctl(8) in OpenBSD 3.5-release */
 
 int
@@ -758,6 +980,27 @@ pfi_get_ifaces(const char *filter, struct pfi_if *buf, int *size, int flags)
 }
 
 int
+pfr_get_tstats(struct pfr_table *filter, struct pfr_tstats *tbl, int *size,
+	int flags)
+{
+	struct pfioc_table io;
+
+	if (size == NULL || *size < 0 || (*size && tbl == NULL))
+		return (-1);
+	bzero(&io, sizeof io);
+	io.pfrio_flags = flags;
+	if (filter != NULL)
+		io.pfrio_table = *filter;
+	io.pfrio_buffer = tbl;
+	io.pfrio_esize = sizeof(*tbl);
+	io.pfrio_size = *size;
+	if (ioctl(dev, DIOCRGETTSTATS, &io))
+		return (-1);
+	*size = io.pfrio_size;
+	return (0);
+}
+
+int
 pfr_buf_grow(struct pfr_buffer *b, int minsize)
 {
 	caddr_t p;
@@ -765,7 +1008,7 @@ pfr_buf_grow(struct pfr_buffer *b, int minsize)
 
 	if (minsize != 0 && minsize <= b->pfrb_msize)
 		return (0);
-	bs = sizeof(struct pfi_if);
+	bs = buf_esize[b->pfrb_type];
 	if (!b->pfrb_msize) {
 		if (minsize < 64)
 			minsize = 64;
@@ -801,7 +1044,7 @@ pfr_buf_next(struct pfr_buffer *b, const void *prev)
 		return (NULL);
 	if (prev == NULL) 
 		return (b->pfrb_caddr);
-	bs = sizeof(struct pfi_if);
+	bs = buf_esize[b->pfrb_type];
 	if ((((caddr_t)prev)-((caddr_t)b->pfrb_caddr)) / bs >= b->pfrb_size-1)
 		return (NULL);
 

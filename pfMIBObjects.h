@@ -89,6 +89,27 @@
 #define PF_IFOUT6PASSBYTES	147
 #define PF_IFOUT6BLOCKPKTS	148
 #define PF_IFOUT6BLOCKBYTES	149
+#define PF_TANUMBER		150
+#define PF_TAINDEX		151
+#define PF_TANAME		152
+#define PF_TAADDRESSES		153
+#define PF_TAANCHORREFS		154
+#define PF_TARULEREFS		155
+#define PF_TAEVALSMATCH		156
+#define PF_TAEVALSNOMATCH	157
+#define PF_TAINPASSPKTS		158
+#define PF_TAINPASSBYTES	159
+#define PF_TAINBLOCKPKTS	160
+#define PF_TAINBLOCKBYTES	161
+#define PF_TAINXPASSPKTS	162
+#define PF_TAINXPASSBYTES	163
+#define PF_TAOUTPASSPKTS	164
+#define PF_TAOUTPASSBYTES	165
+#define PF_TAOUTBLOCKPKTS	166
+#define PF_TAOUTBLOCKBYTES	167
+#define PF_TAOUTXPASSPKTS	168
+#define PF_TAOUTXPASSBYTES	169
+#define PF_TASTATSCLEARED	170
 
 #define PFI_IFTYPE_GROUP	0
 #define PFI_IFTYPE_INSTANCE	1
@@ -99,12 +120,15 @@ enum { IN, OUT };
 enum { IPV4, IPV6 };
 enum { PASS, BLOCK };
 
+enum { PFRB_TSTATS = 1, PFRB_IFACES, PFRB_MAX };
+
 config_require(util_funcs)
 
 FindVarMethod var_if_number;
 FindVarMethod var_if_table;
 FindVarMethod var_limits;
 FindVarMethod var_pfMIBObjects;
+FindVarMethod var_tables_table;
 FindVarMethod var_timeouts;
 
 /* from pfctl */
@@ -123,13 +147,15 @@ int		 pfi_get_ifaces(const char *, struct pfi_if *, int *, int);
 int		 pfi_refresh(void);
 int		 pfr_buf_grow(struct pfr_buffer *, int);
 void		*pfr_buf_next(struct pfr_buffer *, const void *);
-unsigned char	*var_if_number(struct variable *, oid *, size_t *, int,
-	size_t *, WriteMethod **);
 unsigned char	*var_if_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_pfMIBObjects(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_limits(struct variable *, oid *, size_t *, int,
+	size_t *, WriteMethod **);
+unsigned char	*var_table_number(struct variable *, oid *, size_t *, int,
+	size_t *, WriteMethod **);
+unsigned char	*var_tables_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_timeouts(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
