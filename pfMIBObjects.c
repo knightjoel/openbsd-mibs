@@ -18,8 +18,6 @@
  */
 
 
-#include <config.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
@@ -33,8 +31,10 @@
 #include <net/pfvar.h>
 #include <arpa/inet.h>
 
-#include "mibincl.h"
-#include "util_funcs.h"
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "pfMIBObjects.h"
 
 
