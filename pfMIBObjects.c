@@ -247,7 +247,7 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &c64;
 
 		case NAME:
-			sprintf(string, "%s", s.ifname);
+			strlcpy(string, s.ifname, sizeof(string));
 			*var_len = strlen(string);
 			return (unsigned char *) string;
 
