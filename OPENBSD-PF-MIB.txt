@@ -148,6 +148,83 @@ memory OBJECT-TYPE
 	"The number of packets that were dropped due to memory limitations."
     ::= { counters 6 }
 
+timestamp OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to improper RFC1323 timestamp."
+    ::= { counters 7 }
+
+congestion OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to congestion on the interface."
+    ::= { counters 8 }
+
+ip-option OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to having options set in
+    the IP header."
+    ::= { counters 9 }
+
+proto-cksum OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to memory limitations."
+    ::= { counters 10 }
+
+state-mismatch OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to a state table mismatch."
+    ::= { counters 11 }
+
+state-insert OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to errors creating a
+	state table entry."
+    ::= { counters 12 }
+
+state-limit OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to the per-rule max
+	state limit being reached."
+    ::= { counters 13 }
+
+src-limit OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped due to stateful connection
+	tracking. A packet could be dropped due to resource limits (memory)
+	or due to a tracking limit being reached."
+    ::= { counters 14 }
+
+synproxy OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The number of packets that were dropped during the TCP synproxy process."
+    ::= { counters 15 }
+
 
 -- stateTable
 

@@ -69,6 +69,15 @@ struct variable4 pfMIBObjects_variables[] = {
   { SHORT		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,4 } },
   { NORMALIZE		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,5 } },
   { MEMORY		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,6 } },
+  { TIMESTAMP		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,7 } },
+  { CONGEST		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,8 } },
+  { IPOPTIONS		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,9 } },
+  { PROTCKSUM		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,10 } },
+  { BADSTATE		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,11 } },
+  { STATEINS		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,12 } },
+  { MAXSTATES		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,13 } },
+  { SRCLIMIT		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,14 } },
+  { SYNPROXY		, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 2,15 } },
   { STATES_COUNT	, ASN_UNSIGNED  , RONLY , var_pfMIBObjects, 2, { 3,1 } },
   { STATES_SEARCHES	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 3,2 } },
   { STATES_INSERTS	, ASN_COUNTER64 , RONLY , var_pfMIBObjects, 2, { 3,3 } },
@@ -310,6 +319,60 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 		case MEMORY:
 			c64.high = s.counters[PFRES_MEMORY] >> 32;
 			c64.low = s.counters[PFRES_MEMORY] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case TIMESTAMP:
+			c64.high = s.counters[PFRES_TS] >> 32;
+			c64.low = s.counters[PFRES_TS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case CONGEST:
+			c64.high = s.counters[PFRES_CONGEST] >> 32;
+			c64.low = s.counters[PFRES_CONGEST] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case IPOPTIONS:
+			c64.high = s.counters[PFRES_IPOPTIONS] >> 32;
+			c64.low = s.counters[PFRES_IPOPTIONS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PROTCKSUM:
+			c64.high = s.counters[PFRES_PROTCKSUM] >> 32;
+			c64.low = s.counters[PFRES_PROTCKSUM] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case BADSTATE:
+			c64.high = s.counters[PFRES_BADSTATE] >> 32;
+			c64.low = s.counters[PFRES_BADSTATE] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case STATEINS:
+			c64.high = s.counters[PFRES_STATEINS] >> 32;
+			c64.low = s.counters[PFRES_STATEINS] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case MAXSTATES:
+			c64.high = s.counters[PFRES_MAXSTATES] >> 32;
+			c64.low = s.counters[PFRES_MAXSTATES] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case SRCLIMIT:
+			c64.high = s.counters[PFRES_SRCLIMIT] >> 32;
+			c64.low = s.counters[PFRES_SRCLIMIT] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case SYNPROXY:
+			c64.high = s.counters[PFRES_SYNPROXY] >> 32;
+			c64.low = s.counters[PFRES_SYNPROXY] & 0xffffffff;
 			*var_len = sizeof(c64);
 			return (unsigned char *) &c64;
 
