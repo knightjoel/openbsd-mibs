@@ -149,7 +149,6 @@
 
 #define PFI_IFTYPE_GROUP	0
 #define PFI_IFTYPE_INSTANCE	1
-#define PFI_IFTYPE_DETACH	2
 #define PFI_TABLE_MAXAGE	5
 
 enum { IN, OUT };
@@ -179,8 +178,8 @@ struct pfr_buffer {
 
 void		 init_pfMIBObjects(void);
 void 		*pfr_buf_next(struct pfr_buffer *, const void *);
-int		 pfi_get(struct pfr_buffer *, const char *, int);
-int		 pfi_get_ifaces(const char *, struct pfi_if *, int *, int);
+int		 pfi_get(struct pfr_buffer *, const char *);
+int		 pfi_get_ifaces(const char *, struct pfi_kif *, int *);
 int		 pfi_refresh(void);
 int		 pfr_buf_grow(struct pfr_buffer *, int);
 void		*pfr_buf_next(struct pfr_buffer *, const void *);

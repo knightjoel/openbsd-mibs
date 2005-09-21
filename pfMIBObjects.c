@@ -52,7 +52,7 @@ time_t		pfi_table_age;
 size_t buf_esize[PFRB_MAX] = { 0,
 	sizeof(struct pfr_tstats), 
 	sizeof(struct pfr_astats),
-	sizeof(struct pfi_if)
+	sizeof(struct pfi_kif)
 };
 
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
@@ -649,7 +649,7 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
 	struct pfr_buffer b;
-	struct pfi_if *p;
+	struct pfi_kif *p;
 	int index;
 	static struct counter64 c64;
 	static u_long ulong_ret;
@@ -668,33 +668,10 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 	if (!pfi_table[index])
 		return (NULL);
 
-	if (pfi_get(&b, (const char *)&pfi_table[index], PFI_FLAG_INSTANCE) 
+	if (pfi_get(&b, (const char *)&pfi_table[index]) 
 			|| b.pfrb_size == 0) {
 		free(b.pfrb_caddr);
-		switch (vp->magic) {
-			case PF_IFINDEX:
-				ulong_ret = index + 1;
-				return (unsigned char *) &ulong_ret;
-
-			case PF_IFNAME:
-				*var_len = strlen(&pfi_table[index]);
-				return (unsigned char *) pfi_table[index];
-
-			case PF_IFTYPE:
-				ulong_ret = PFI_IFTYPE_DETACH;
-				return (unsigned char *) &ulong_ret;
-
-			case PF_IFREF:
-			case PF_IFRULES:
-				ulong_ret = 0;
-				return (unsigned char *) &ulong_ret;
-
-			default:
-				c64.high = 0;
-				c64.low = 0;
-				*var_len = sizeof(c64);
-				return (unsigned char *) &c64;
-		}
+		return (NULL);
 	} 
 	/* we only ask for 1 interface from pfi_get() */
 	p = b.pfrb_caddr;
@@ -711,98 +688,100 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) pfi_table[index];
 
 		case PF_IFTYPE:
-			ulong_ret = PFI_IFTYPE_INSTANCE;
+			/* XXX weak test; group names can end in digits */
+			ulong_ret = isdigit(p->pfik_name[strlen(p->pfik_name)-1]) ? 
+				PFI_IFTYPE_INSTANCE : PFI_IFTYPE_GROUP;
 			free(b.pfrb_caddr);
 			return (unsigned char *) &ulong_ret;
 
 		case PF_IFREF:
-			ulong_ret = p->pfif_states;
+			ulong_ret = p->pfik_states;
 			free(b.pfrb_caddr);
 			return (unsigned char *) &ulong_ret;
 
 		case PF_IFRULES:
-			ulong_ret = p->pfif_rules;
+			ulong_ret = p->pfik_rules;
 			free(b.pfrb_caddr);
 			return (unsigned char *) &ulong_ret;
 
 		case PF_IFIN4PASSPKTS:
-			c64.high = p->pfif_packets[IPV4][IN][PASS] >> 32;
-			c64.low = p->pfif_packets[IPV4][IN][PASS] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV4][IN][PASS] >> 32;
+			c64.low = p->pfik_packets[IPV4][IN][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFIN4PASSBYTES:
-			c64.high = p->pfif_bytes[IPV4][IN][PASS] >> 32;
-			c64.low = p->pfif_bytes[IPV4][IN][PASS] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV4][IN][PASS] >> 32;
+			c64.low = p->pfik_bytes[IPV4][IN][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFIN4BLOCKPKTS:
-			c64.high = p->pfif_packets[IPV4][IN][BLOCK] >> 32;
-			c64.low = p->pfif_packets[IPV4][IN][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV4][IN][BLOCK] >> 32;
+			c64.low = p->pfik_packets[IPV4][IN][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFIN4BLOCKBYTES:
-			c64.high = p->pfif_bytes[IPV4][IN][BLOCK] >> 32;
-			c64.low = p->pfif_bytes[IPV4][IN][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV4][IN][BLOCK] >> 32;
+			c64.low = p->pfik_bytes[IPV4][IN][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFOUT4PASSPKTS:
-			c64.high = p->pfif_packets[IPV4][OUT][PASS] >> 32;
-			c64.low = p->pfif_packets[IPV4][OUT][PASS] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV4][OUT][PASS] >> 32;
+			c64.low = p->pfik_packets[IPV4][OUT][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFOUT4PASSBYTES:
-			c64.high = p->pfif_bytes[IPV4][OUT][PASS] >> 32;
-			c64.low = p->pfif_bytes[IPV4][OUT][PASS] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV4][OUT][PASS] >> 32;
+			c64.low = p->pfik_bytes[IPV4][OUT][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFOUT4BLOCKPKTS:
-			c64.high = p->pfif_packets[IPV4][OUT][BLOCK] >> 32;
-			c64.low = p->pfif_packets[IPV4][OUT][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV4][OUT][BLOCK] >> 32;
+			c64.low = p->pfik_packets[IPV4][OUT][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFOUT4BLOCKBYTES:
-			c64.high = p->pfif_bytes[IPV4][OUT][BLOCK] >> 32;
-			c64.low = p->pfif_bytes[IPV4][OUT][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV4][OUT][BLOCK] >> 32;
+			c64.low = p->pfik_bytes[IPV4][OUT][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFIN6PASSPKTS:
-			c64.high = p->pfif_packets[IPV6][IN][PASS] >> 32;
-			c64.low = p->pfif_packets[IPV6][IN][PASS] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV6][IN][PASS] >> 32;
+			c64.low = p->pfik_packets[IPV6][IN][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFIN6PASSBYTES:
-			c64.high = p->pfif_bytes[IPV6][IN][PASS] >> 32;
-			c64.low = p->pfif_bytes[IPV6][IN][PASS] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV6][IN][PASS] >> 32;
+			c64.low = p->pfik_bytes[IPV6][IN][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFIN6BLOCKPKTS:
-			c64.high = p->pfif_packets[IPV6][IN][BLOCK] >> 32;
-			c64.low = p->pfif_packets[IPV6][IN][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV6][IN][BLOCK] >> 32;
+			c64.low = p->pfik_packets[IPV6][IN][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFIN6BLOCKBYTES:
-			c64.high = p->pfif_bytes[IPV6][IN][BLOCK] >> 32;
-			c64.low = p->pfif_bytes[IPV6][IN][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV6][IN][BLOCK] >> 32;
+			c64.low = p->pfik_bytes[IPV6][IN][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFOUT6PASSPKTS:
-			c64.high = p->pfif_packets[IPV6][OUT][PASS] >> 32;
-			c64.low = p->pfif_packets[IPV6][OUT][PASS] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV6][OUT][PASS] >> 32;
+			c64.low = p->pfik_packets[IPV6][OUT][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFOUT6PASSBYTES:
-			c64.high = p->pfif_bytes[IPV6][OUT][PASS] >> 32;
-			c64.low = p->pfif_bytes[IPV6][OUT][PASS] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV6][OUT][PASS] >> 32;
+			c64.low = p->pfik_bytes[IPV6][OUT][PASS] & 0xffffffff;
 			break;
 
 		case PF_IFOUT6BLOCKPKTS:
-			c64.high = p->pfif_packets[IPV6][OUT][BLOCK] >> 32;
-			c64.low = p->pfif_packets[IPV6][OUT][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_packets[IPV6][OUT][BLOCK] >> 32;
+			c64.low = p->pfik_packets[IPV6][OUT][BLOCK] & 0xffffffff;
 			break;
 
 		case PF_IFOUT6BLOCKBYTES:
-			c64.high = p->pfif_bytes[IPV6][OUT][BLOCK] >> 32;
-			c64.low = p->pfif_bytes[IPV6][OUT][BLOCK] & 0xffffffff;
+			c64.high = p->pfik_bytes[IPV6][OUT][BLOCK] >> 32;
+			c64.low = p->pfik_bytes[IPV6][OUT][BLOCK] & 0xffffffff;
 			break;
 			
 		default:
@@ -1135,14 +1114,14 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 }
 
 int
-pfi_get(struct pfr_buffer *b, const char *filter, int flags)
+pfi_get(struct pfr_buffer *b, const char *filter)
 {
 	bzero(b, sizeof(struct pfr_buffer));
 	b->pfrb_type = PFRB_IFACES;
 	for (;;) {
 		pfr_buf_grow(b, b->pfrb_size);
 		b->pfrb_size = b->pfrb_msize;
-		if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size), flags)) {
+		if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size))) {
 			ERROR_MSG("pfi_get_ifaces() failed");
 			return (1);
 		}
@@ -1200,10 +1179,10 @@ int
 pfi_refresh(void)
 {
 	struct pfr_buffer b;
-	struct pfi_if *p;
+	struct pfi_kif *p;
 	int i, match=0;
 
-	if (pfi_get(&b, NULL, PFI_FLAG_INSTANCE)) {
+	if (pfi_get(&b, NULL)) {
 		ERROR_MSG("Could not get list of interfaces");
 		return (1);
 	}
@@ -1211,11 +1190,11 @@ pfi_refresh(void)
 	for (p = pfr_buf_next(&b, NULL); p != NULL; 
 			p = pfr_buf_next(&b, p), match = 0) {
 		for (i = 0; i < pfi_count && !match; i++) {
-			if (strncmp(p->pfif_name, &pfi_table[i], IFNAMSIZ) == 0)
+			if (strncmp(p->pfik_name, &pfi_table[i], IFNAMSIZ) == 0)
 				match = 1;
 		}
 		if (!match) {
-			snprintf(pfi_table[pfi_count], IFNAMSIZ, p->pfif_name);
+			snprintf(pfi_table[pfi_count], IFNAMSIZ, p->pfik_name);
 			pfi_count++;
 		}
 	}
@@ -1253,12 +1232,16 @@ pft_refresh(void)
 /* the following code taken from pfctl(8) in OpenBSD 3.5-release */
 
 int
-pfi_get_ifaces(const char *filter, struct pfi_if *buf, int *size, int flags)
+pfi_get_ifaces(const char *filter, struct pfi_kif *buf, int *size)
 {
 	struct pfioc_iface io;
 
+	if (size == NULL || *size < 0 || (*size && buf == NULL)) {
+		ERROR_MSG("pfi_get_ifaces(): failed");
+		return (-1);
+	}
+
 	bzero(&io, sizeof(io));
-	io.pfiio_flags = flags;
 	if (filter != NULL) {
 		if (strlcpy(io.pfiio_name, filter, sizeof(io.pfiio_name)) >=
 			sizeof(io.pfiio_name)) {
@@ -1270,7 +1253,7 @@ pfi_get_ifaces(const char *filter, struct pfi_if *buf, int *size, int flags)
 	io.pfiio_esize = sizeof(*buf);
 	io.pfiio_size = *size;
 	if (ioctl(dev, DIOCIGETIFACES, &io)) {
-		ERROR_MSG("ioct failed");
+		ERROR_MSG("ioctl(): DIOCGETIFACES failed");
 		return (-1);
 	}
 	*size = io.pfiio_size;
