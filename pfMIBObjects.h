@@ -145,6 +145,16 @@
 #define PF_TADDROUTBLOCKBYTES	180
 #define PF_TADDROUTPASSPKTS	181
 #define PF_TADDROUTPASSBYTES	182
+#define PF_LANUMBER		183
+#define PF_LAINDEX		184
+#define PF_LANAME		185
+#define PF_LAEVALS		186
+#define PF_LAPKTS		187
+#define PF_LABYTES		188
+#define PF_LAINPKTS		189
+#define PF_LAINBYTES		190
+#define PF_LAOUTPKTS		191
+#define PF_LAOUTBYTES		192
 
 
 #define PFI_IFTYPE_GROUP	0
@@ -166,6 +176,7 @@ FindVarMethod var_pfMIBObjects;
 FindVarMethod var_tables_table;
 FindVarMethod var_tbl_addr_table;
 FindVarMethod var_timeouts;
+FindVarMethod var_labels_table;
 
 /* from pfctl */
 struct pfr_buffer {
@@ -196,6 +207,8 @@ unsigned char	*var_tables_table(struct variable *, oid *, size_t *, int,
 unsigned char	*var_tbl_addr_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_timeouts(struct variable *, oid *, size_t *, int,
+	size_t *, WriteMethod **);
+unsigned char	*var_labels_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 
 

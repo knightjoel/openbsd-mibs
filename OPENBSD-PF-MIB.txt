@@ -35,7 +35,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "200501250000Z"
+    LAST-UPDATED "200605040000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -58,6 +58,7 @@ limits				OBJECT IDENTIFIER ::= { pfMIBObjects 6 }
 timeouts			OBJECT IDENTIFIER ::= { pfMIBObjects 7 }
 interfaces			OBJECT IDENTIFIER ::= { pfMIBObjects 8 }
 tables				OBJECT IDENTIFIER ::= { pfMIBObjects 9 }
+labels				OBJECT IDENTIFIER ::= { pfMIBObjects 10 }
 
 -- info
 
@@ -1192,6 +1193,120 @@ tblAddrOutPassBytes OBJECT-TYPE
 	"The number of outbound bytes passed as a result of matchg
 	this table entry."
 	::= { tblAddrEntry 12 }
+
+
+-- labels
+lblNumber  OBJECT-TYPE
+	SYNTAX      Integer32
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"The number of labels present on this system."
+	::= { labels 1 }
+
+lblTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF LblEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"A list of individual labels. The number of entries is
+	given by the value of labelNumber."
+	::= { labels 128 }
+
+lblEntry OBJECT-TYPE
+	SYNTAX      LblEntry
+	MAX-ACCESS  not-accessible
+	STATUS      current
+	DESCRIPTION
+	"An entry containing management information applicable to a
+	particular label."
+	INDEX   { lblIndex }
+	::= { lblTable 1 }
+
+LblEntry ::=
+	SEQUENCE {
+		lblIndex		Integer32,
+		lblName			OCTET STRING,
+		lblEvals		Counter64,
+		lblPkts			Counter64,
+		lblBytes		Counter64,
+		lblInPkts		Counter64,
+		lblInBytes		Counter64,
+		lblOutPkts		Counter64,
+		lblOutBytes		Counter64,
+	}
+
+lblIndex OBJECT-TYPE
+	SYNTAX		Integer32 (1..2147483647)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"A unique value, greater than zero, for each label."
+	::= { lblEntry 1 }
+
+lblName OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The name of the label."
+	::= { lblEntry 2 }
+
+lblEvals OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of rule evaluations."
+	::= { lblEntry 3 }
+
+lblPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The total number of packets matched by the rule."
+	::= { lblEntry 4 }
+
+lblBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The total number of bytes matched by the rule."
+	::= { lblEntry 5 }
+
+lblInPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming packets matched by the rule."
+	::= { lblEntry 6 }
+
+lblInBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of incoming bytes matched by the rule."
+	::= { lblEntry 7 }
+
+lblOutPkts OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing packets matched by the rule."
+	::= { lblEntry 8 }
+
+lblOutBytes OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The number of outgoing bytes matched by the rule."
+	::= { lblEntry 9 }
 
 
 

@@ -47,6 +47,7 @@ int		dev = -1;
 char 		*pfi_table[255][IFNAMSIZ];
 unsigned int	pfi_count;
 unsigned int	pft_count;
+unsigned int	pfl_count;
 time_t		pfi_table_age;
 
 size_t buf_esize[PFRB_MAX] = { 0,
@@ -176,6 +177,16 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_TADDROUTBLOCKBYTES,ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,10 } },
   { PF_TADDROUTPASSPKTS , ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,11 } },
   { PF_TADDROUTPASSBYTES, ASN_COUNTER64	, RONLY , var_tbl_addr_table, 4, { 9,129,1,12 } },
+  { PF_LANUMBER		, ASN_INTEGER	, RONLY	, var_table_number, 2, { 10,1 } },
+  { PF_LAINDEX		, ASN_INTEGER	, RONLY	, var_labels_table, 4, { 10,128,1,1 } },
+  { PF_LANAME		, ASN_OCTET_STR	, RONLY	, var_labels_table, 4, { 10,128,1,2 } },
+  { PF_LAEVALS		, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,3 } },
+  { PF_LAPKTS		, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,4 } },
+  { PF_LABYTES		, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,5 } },
+  { PF_LAINPKTS		, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,6 } },
+  { PF_LAINBYTES	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,7 } },
+  { PF_LAOUTPKTS	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,8 } },
+  { PF_LAOUTBYTES	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,9 } },
 };
 
 
@@ -637,6 +648,11 @@ var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 			ulong_ret = pft_count;
 			return (unsigned char *) &ulong_ret;
 		
+		case PF_LANUMBER:
+			pfl_refresh();
+			ulong_ret = pfl_count;
+			return (unsigned char *) &ulong_ret;
+
 		default:
 			ERROR_MSG("");
 			return (NULL);
@@ -790,6 +806,112 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 	}
 	
 	free(b.pfrb_caddr);
+	*var_len = sizeof(c64);
+	return (unsigned char *) &c64;
+}
+
+unsigned char * 
+var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	u_long nr, mnr;
+	struct pfioc_rule pr;
+	static struct counter64 c64;
+	static u_long ulong_ret;
+	static char lname[PF_RULE_LABEL_SIZE];
+	int index;
+
+	if (dev == -1)
+		return (NULL);
+	
+
+	pfl_refresh();
+	if (header_simple_table(vp, name, length, exact, var_len, write_method, pfl_count)
+			== MATCH_FAILED) {
+		return (NULL);
+	}
+
+	index = name[*length-1];
+
+	memset(&pr, 0, sizeof(pr));
+	if (ioctl(dev, DIOCGETRULES, &pr)) {
+		ERROR_MSG("ioctl error doing DIOCGETRULES");
+		return (NULL);
+	}
+
+	mnr = pr.nr;
+	for (nr = 0; nr < mnr; ++nr) {
+		pr.nr = nr;
+		if (ioctl(dev, DIOCGETRULE, &pr)) {
+			ERROR_MSG("ioctl error doing DIOCGETRULE");
+			return (NULL);
+		}
+
+		if (pr.rule.label[0])
+			if (nr == index)
+				break;
+	}
+	
+	switch (vp->magic) {
+		case PF_LAINDEX:
+			ulong_ret = index;
+			return (unsigned char *) &ulong_ret;
+
+		case PF_LANAME:
+			*var_len = strlen(pr.rule.label);
+			strlcpy(lname, pr.rule.label, sizeof(lname));
+			return (unsigned char *) lname;
+
+		case PF_LAEVALS:
+			c64.high = pr.rule.evaluations >> 32;
+			c64.low = pr.rule.evaluations & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LAPKTS:
+			c64.high = (pr.rule.packets[IN] >> 32) 
+				+ (pr.rule.packets[OUT] >> 32);
+			c64.low = (pr.rule.packets[IN] & 0xffffffff) 
+				+ (pr.rule.packets[OUT] & 0xffffffff);
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LABYTES:
+			c64.high = (pr.rule.bytes[IN] >> 32)
+				+ (pr.rule.bytes[OUT] >> 32);
+			c64.low = (pr.rule.bytes[IN] & 0xffffffff)
+				+ (pr.rule.bytes[OUT] & 0xffffffff);
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LAINPKTS:
+			c64.high = pr.rule.packets[IN] >> 32;
+			c64.low = pr.rule.packets[IN] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LAINBYTES:
+			c64.high = pr.rule.bytes[IN] >> 32;
+			c64.low = pr.rule.bytes[IN] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LAOUTPKTS:
+			c64.high = pr.rule.packets[OUT] >> 32;
+			c64.low = pr.rule.packets[OUT] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		case PF_LAOUTBYTES:
+			c64.high = pr.rule.bytes[OUT] >> 32;
+			c64.low = pr.rule.bytes[OUT] & 0xffffffff;
+			*var_len = sizeof(c64);
+			return (unsigned char *) &c64;
+
+		default:
+			return (NULL);
+	}
+
 	*var_len = sizeof(c64);
 	return (unsigned char *) &c64;
 }
@@ -1201,6 +1323,34 @@ pfi_refresh(void)
 
 	pfi_table_age = time(NULL);
 	free(b.pfrb_caddr);
+
+	return (0);
+}
+
+int
+pfl_refresh(void)
+{
+	u_long nr, mnr;
+	struct pfioc_rule pr;
+
+	pfl_count = 0;
+	memset(&pr, 0, sizeof(pr));
+	if (ioctl(dev, DIOCGETRULES, &pr)) {
+		ERROR_MSG("ioctl error doing DIOCGETRULES");
+		return (NULL);
+	}
+
+	mnr = pr.nr;
+	for (nr = 0; nr < mnr; ++nr) {
+		pr.nr = nr;
+		if (ioctl(dev, DIOCGETRULE, &pr)) {
+			ERROR_MSG("ioctl error doing DIOCGETRULE");
+			return (NULL);
+		}
+
+		if (pr.rule.label[0])
+			pfl_count++;
+	}
 
 	return (0);
 }
