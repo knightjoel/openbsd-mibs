@@ -41,7 +41,7 @@ openBSD MODULE-IDENTITY
 -- define MIB objects
 
 -- OPENBSD-PF-MIB:
--- pfMIBObjects				OBJECT IDENTIFIER ::= { openBSD 1 }
+pfMIBObjects				OBJECT IDENTIFIER ::= { openBSD 1 }
 
 
 
