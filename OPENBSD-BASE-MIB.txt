@@ -27,7 +27,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 openBSD MODULE-IDENTITY
-    LAST-UPDATED "200403270000Z"
+    LAST-UPDATED "200612100000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -42,7 +42,7 @@ openBSD MODULE-IDENTITY
 
 -- OPENBSD-PF-MIB:
 pfMIBObjects				OBJECT IDENTIFIER ::= { openBSD 1 }
-
+sensorsMIBObjects			OBJECT IDENTIFIER ::= { openBSD 2 }
 
 
 -- END:  Don't forget this!
