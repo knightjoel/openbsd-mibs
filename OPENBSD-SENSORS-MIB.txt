@@ -38,6 +38,7 @@ sensorsMIBObjects MODULE-IDENTITY
     CONTACT-INFO "
                   Author:     Joel Knight
                   email:      enabled@myrealbox.com
+                  www:        www.packetmischief.ca/openbsd/snmp/
                  "
     DESCRIPTION "The MIB module for gathering information from
 		OpenBSD's kernel sensor framework.

@@ -2,7 +2,7 @@
 -- $jwk$
 --
 --
--- Copyright (c) 2004,2005 Joel Knight <enabled@myrealbox.com>
+-- Copyright (c) 2004-2006 Joel Knight <enabled@myrealbox.com>
 -- 
 -- Permission to use, copy, modify, and distribute this document for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -40,6 +40,7 @@ pfMIBObjects MODULE-IDENTITY
     CONTACT-INFO "
                   Author:     Joel Knight
                   email:      enabled@myrealbox.com
+                  www:        www.packetmischief.ca/openbsd/snmp/
                  "
     DESCRIPTION "The MIB module for gathering information from
 		OpenBSD's packet filter.
