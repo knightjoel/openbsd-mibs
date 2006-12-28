@@ -109,10 +109,10 @@ sensorDescr OBJECT-TYPE
 	::= { sensorEntry 2 }
 
 sensorType OBJECT-TYPE
-	SYNTAX		INTEGER { temperature(0), fanrpm(1), voltsdc(2),
-			voltsac(3), ohms(4), watts(5), amps(6), watthour(7),
-			amphour(8), indicator(9), integer(10), percent(11),
-			lux(12), drive(13), timedelta(14) }
+	SYNTAX		INTEGER { temperature(0), fan(1), voltsdc(2),
+			voltsac(3), resistance(4), power(5), current(6), watthour(7),
+			amphour(8), indicator(9), raw(10), percent(11),
+			illuminance(12), drive(13), timedelta(14) }
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
