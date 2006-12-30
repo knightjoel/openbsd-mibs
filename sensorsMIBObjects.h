@@ -36,6 +36,7 @@
 
 config_require(util_funcs)
 
+FindVarMethod var_sensors;
 FindVarMethod var_sensors_table;
 
 
