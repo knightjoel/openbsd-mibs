@@ -44,6 +44,7 @@ openBSD MODULE-IDENTITY
 -- OPENBSD-PF-MIB:
 pfMIBObjects				OBJECT IDENTIFIER ::= { openBSD 1 }
 sensorsMIBObjects			OBJECT IDENTIFIER ::= { openBSD 2 }
+carpMIBObjects				OBJECT IDENTIFIER ::= { openBSD 3 }
 
 
 -- END:  Don't forget this!

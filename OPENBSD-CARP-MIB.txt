@@ -1,0 +1,151 @@
+--
+-- $jwk$
+--
+--
+-- Copyright (c) 2006 Joel Knight <enabled@myrealbox.com>
+-- 
+-- Permission to use, copy, modify, and distribute this document for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+--
+-- THE DOCUMENT IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS DOCUMENT INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+-- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+-- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS DOCUMENT.
+
+
+OPENBSD-CARP-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, 
+	Integer32, Integer32, enterprises
+		FROM SNMPv2-SMI
+
+	openBSD
+		FROM OPENBSD-BASE-MIB
+	
+	MODULE-COMPLIANCE, OBJECT-GROUP
+		FROM SNMPv2-CONF;
+
+carpMIBObjects MODULE-IDENTITY
+    LAST-UPDATED "200612290000Z"
+    ORGANIZATION "OpenBSD"
+    CONTACT-INFO "
+                  Author:     Joel Knight
+                  email:      enabled@myrealbox.com
+                  www:        www.packetmischief.ca/openbsd/snmp/
+                 "
+    DESCRIPTION "The MIB module for gathering information about
+		Common Address Redundancy Protocol (CARP) interfaces.
+                "
+    ::= { openBSD 3 }
+
+
+-- define the sections of the MIB
+
+carpIf				OBJECT IDENTIFIER ::= { carpMIBObjects 1 }
+
+
+-- carp
+
+carpIfNumber  OBJECT-TYPE
+	SYNTAX      Integer32
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"The number of CARP interfaces present on this system."
+	::= { carpIf 1 }
+
+carpIfTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF CarpIfEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"A list of individual CARP interfaces. The number of entries is
+	given by the value of carpIfNumber."
+	::= { carpIf 2 }
+
+carpIfEntry OBJECT-TYPE
+	SYNTAX      CarpIfEntry
+	MAX-ACCESS  not-accessible
+	STATUS      current
+	DESCRIPTION
+	"An entry containing management information applicable to a
+	particular CARP interface."
+	INDEX   { carpIfIndex }
+	::= { carpIfTable 1 }
+
+CarpIfEntry ::=
+	SEQUENCE {
+		carpIfIndex		Integer32,
+		carpIfDescr		OCTET STRING,
+		carpIfVhid		Integer32,
+		carpIfDev		OCTET STRING,
+		carpIfAdvbase		Integer32,
+		carpIfAdvskew		Integer32,
+		carpIfState		Integer32
+	}
+
+carpIfIndex OBJECT-TYPE
+	SYNTAX		Integer32 (1..2147483647)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"A unique value, greater than zero, for each CARP interface."
+	::= { carpIfEntry 1 }
+
+carpIfDescr OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The name of the CARP interface."
+	::= { carpIfEntry 2 }
+
+carpIfVhid OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The Virtual HostID of the CARP interface."
+	::= { carpIfEntry 3 }
+
+carpIfDev OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The parent interface that the CARP interface is bound to."
+	::= { carpIfEntry 4 }
+
+carpIfAdvbase OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The advbase value of the CARP interface."
+	::= { carpIfEntry 5 }
+
+carpIfAdvskew OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"The advskew value of the CARP interface."
+	::= { carpIfEntry 6 }
+
+carpIfState OBJECT-TYPE
+	SYNTAX		INTEGER { init(0), backup(1), master(2) }
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Indicates the operational state of the CARP interface."
+	::= { carpIfEntry 7 }
+
+
+-- END:  Don't forget this!
+END
+
