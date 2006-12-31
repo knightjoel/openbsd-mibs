@@ -25,19 +25,24 @@
 #include <ifaddrs.h>
 
 
-#define CARPIF_NUMBER		1
-#define CARPIF_INDEX		2
-#define CARPIF_DESCR		3
-#define CARPIF_VHID		4
-#define CARPIF_DEV		5
-#define CARPIF_ADVBASE		6
-#define CARPIF_ADVSKEW		7
-#define CARPIF_STATE		8
+#define CARP_SYSCTL1		100
+#define CARP_SYSCTL2		101
+#define CARP_SYSCTL3		102
+#define CARP_SYSCTL4		103
+#define CARPIF_NUMBER		200
+#define CARPIF_INDEX		201
+#define CARPIF_DESCR		202
+#define CARPIF_VHID		203
+#define CARPIF_DEV		204
+#define CARPIF_ADVBASE		205
+#define CARPIF_ADVSKEW		206
+#define CARPIF_STATE		207
 
 config_require(util_funcs)
 
 FindVarMethod var_carpif;
 FindVarMethod var_carpif_table;
+FindVarMethod var_carp_sysctl;
 
 struct carpif {
 	struct ifaddrs ifa;
@@ -47,6 +52,7 @@ struct carpif {
 void		 init_carpMIBObjects(void);
 int		 carpif_count(void);
 int		 carpif_get(int, struct carpif *);
+int		 carp_sysctl_get(int);
 unsigned char	*var_carpif(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_carpif_table(struct variable *, oid *, size_t *, int,

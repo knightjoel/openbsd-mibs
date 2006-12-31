@@ -24,6 +24,9 @@ IMPORTS
 	Integer32, Integer32, enterprises
 		FROM SNMPv2-SMI
 
+	TruthValue
+		FROM SNMPv2-TC
+
 	openBSD
 		FROM OPENBSD-BASE-MIB
 	
@@ -46,12 +49,47 @@ carpMIBObjects MODULE-IDENTITY
 
 -- define the sections of the MIB
 
-carpIf				OBJECT IDENTIFIER ::= { carpMIBObjects 1 }
+carpSysctl			OBJECT IDENTIFIER ::= { carpMIBObjects 1 }
+carpIf				OBJECT IDENTIFIER ::= { carpMIBObjects 2 }
 
 
--- carp
+-- carpSysctl
+carpAllow OBJECT-TYPE
+	SYNTAX      TruthValue
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Indicates whether the node will respond to CARP packets."
+	::= { carpSysctl 1 }
 
-carpIfNumber  OBJECT-TYPE
+carpPreempt OBJECT-TYPE
+	SYNTAX      TruthValue
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Indicates whether preemption is enabled."
+	::= { carpSysctl 2 }
+
+carpLog OBJECT-TYPE
+	SYNTAX      TruthValue
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Indicates whether logging of invalud CARP packets is enabled."
+	::= { carpSysctl 3 }
+
+carpArpbalance OBJECT-TYPE
+	SYNTAX      TruthValue
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Indicates whether load balancing is enabled."
+	::= { carpSysctl 4 }
+
+
+-- carpIf
+
+carpIfNumber OBJECT-TYPE
 	SYNTAX      Integer32
 	MAX-ACCESS  read-only
 	STATUS      current
