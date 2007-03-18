@@ -18,6 +18,7 @@
  */
 
 
+#include <errno.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -208,6 +209,8 @@ carpif_get(int index, struct carpif *carp)
 		return (-1);
 
 	if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+		snmp_log(LOG_ERR, "carpif_get: socket: %s\n",
+			strerror(errno));
 		freeifaddrs(ifap);
 		return (-1);
 	}
@@ -220,6 +223,8 @@ carpif_get(int index, struct carpif *carp)
 	ifr.ifr_data = (caddr_t)&carpr;
 
 	if (ioctl(s, SIOCGVH, (caddr_t)&ifr) == -1) {
+		snmp_log(LOG_ERR, "carpif_get: ioctl: %s\n",
+			strerror(errno));
 		freeifaddrs(ifap);
 		return (-1);
 	}
@@ -245,8 +250,11 @@ carp_sysctl_get(int index)
 	mib[3] = index;
 	len = sizeof(v);
 
-	if (sysctl(mib, 4, &v, &len, NULL, 0) == -1)
+	if (sysctl(mib, 4, &v, &len, NULL, 0) == -1) {
+		snmp_log(LOG_ERR, "carp_sysctl_get: sysctl: %s\n",
+			strerror(errno));
 		return (-1);
+	}
 
 	return (v);
 }
