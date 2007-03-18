@@ -912,8 +912,7 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (NULL);
 	}
 
-	*var_len = sizeof(c64);
-	return ((unsigned char *) &c64);
+	/* NOTREACHED */
 }
 
 unsigned char *
