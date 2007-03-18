@@ -18,19 +18,17 @@
  */
 
 
-#include <errno.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/param.h>
+#include <sys/socket.h>
 #include <sys/sysctl.h>
-
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <net/if_types.h>
-
 #include <netinet/in.h>
 #include <netinet/ip_carp.h>
+
+#include <errno.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>

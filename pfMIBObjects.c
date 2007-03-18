@@ -18,18 +18,18 @@
  */
 
 
-#include <errno.h>
-#include <fcntl.h>
-#include <time.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-
 #include <netinet/in.h>
 #include <net/if.h>
 #include <net/pfvar.h>
 #include <arpa/inet.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <time.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -215,10 +215,10 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
 			== MATCH_FAILED)
-		return NULL;
+		return (NULL);
 
 	if (dev == -1)
-		return NULL;
+		return (NULL);
 
 	memset(&pl, 0, sizeof(pl));
 
@@ -237,15 +237,15 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 						
 		default:
-			return NULL;
+			return (NULL);
 	}
 
 	if (ioctl(dev, DIOCGETLIMIT, &pl)) {
 		snmp_log(LOG_ERR, "var_limits: ioctl: %s\n", strerror(errno));
-		return NULL;
+		return (NULL);
 	}
 	ulong_ret = pl.limit;
-	return (unsigned char *) &ulong_ret;
+	return ((unsigned char *) &ulong_ret);
 }
 
 unsigned char *
@@ -262,23 +262,23 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
 			== MATCH_FAILED )
-		return NULL;
+		return (NULL);
 
 	if (dev == -1)
-		return NULL;
+		return (NULL);
 
 	memset(&s, 0, sizeof(s));
 	if (ioctl(dev, DIOCGETSTATUS, &s)) {
 		snmp_log(LOG_ERR, "var_pfMIBObjects: ioctl: %s\n",
 				strerror(errno));
-		return NULL;
+		return (NULL);
 	}
 
 	switch(vp->magic) {
 
 		case RUNNING:
 			long_ret = (long) s.running;
-			return (unsigned char *) &long_ret;
+			return ((unsigned char *) &long_ret);
 
 		case RUNTIME:
 			if (s.since > 0)
@@ -286,100 +286,100 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 			else
 				runtime = 0;
 			long_ret = (long) runtime * 100;
-			return (unsigned char *) &long_ret;
+			return ((unsigned char *) &long_ret);
 
 		case DEBUG:
 			long_ret = (long) s.debug;
-			return (unsigned char *) &long_ret;
+			return ((unsigned char *) &long_ret);
 
 		case HOSTID:
 			sprintf(string, "0x%08x", ntohl(s.hostid));
 			*var_len = strlen(string);
-			return (unsigned char *) string;
+			return ((unsigned char *) string);
 
 		case MATCH:
 			c64.high = s.counters[PFRES_MATCH] >> 32;
 			c64.low = s.counters[PFRES_MATCH] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case BADOFFSET:
 			c64.high = s.counters[PFRES_BADOFF] >> 32;
 			c64.low = s.counters[PFRES_BADOFF] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case FRAGMENT:
 			c64.high = s.counters[PFRES_FRAG] >> 32;
 			c64.low = s.counters[PFRES_FRAG] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SHORT:
 			c64.high = s.counters[PFRES_SHORT] >> 32;
 			c64.low = s.counters[PFRES_SHORT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case NORMALIZE:
 			c64.high = s.counters[PFRES_NORM] >> 32;
 			c64.low = s.counters[PFRES_NORM] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case MEMORY:
 			c64.high = s.counters[PFRES_MEMORY] >> 32;
 			c64.low = s.counters[PFRES_MEMORY] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case TIMESTAMP:
 			c64.high = s.counters[PFRES_TS] >> 32;
 			c64.low = s.counters[PFRES_TS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case CONGEST:
 			c64.high = s.counters[PFRES_CONGEST] >> 32;
 			c64.low = s.counters[PFRES_CONGEST] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPOPTIONS:
 			c64.high = s.counters[PFRES_IPOPTIONS] >> 32;
 			c64.low = s.counters[PFRES_IPOPTIONS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PROTCKSUM:
 			c64.high = s.counters[PFRES_PROTCKSUM] >> 32;
 			c64.low = s.counters[PFRES_PROTCKSUM] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case BADSTATE:
 			c64.high = s.counters[PFRES_BADSTATE] >> 32;
 			c64.low = s.counters[PFRES_BADSTATE] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case STATEINS:
 			c64.high = s.counters[PFRES_STATEINS] >> 32;
 			c64.low = s.counters[PFRES_STATEINS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case MAXSTATES:
 			c64.high = s.counters[PFRES_MAXSTATES] >> 32;
 			c64.low = s.counters[PFRES_MAXSTATES] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SRCLIMIT:
 			c64.high = s.counters[PFRES_SRCLIMIT] >> 32;
 			c64.low = s.counters[PFRES_SRCLIMIT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SYNPROXY:
 			c64.high = s.counters[PFRES_SYNPROXY] >> 32;
@@ -389,129 +389,130 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 
 		case STATES_COUNT:
 			ulong_ret = (long) s.states;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case STATES_SEARCHES:
 			c64.high = s.fcounters[FCNT_STATE_SEARCH] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_SEARCH] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case STATES_INSERTS:
 			c64.high = s.fcounters[FCNT_STATE_INSERT] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_INSERT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case STATES_REMOVALS:
 			c64.high = s.fcounters[FCNT_STATE_REMOVALS] >> 32;
 			c64.low = s.fcounters[FCNT_STATE_REMOVALS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LOGIF_NAME:
 			strlcpy(string, s.ifname, sizeof(string));
 			*var_len = strlen(string);
-			return (unsigned char *) string;
+			return ((unsigned char *) string);
 
 		case IPBYTESIN:
 			c64.high = s.bcounters[IPV4][IN] >> 32;
 			c64.low = s.bcounters[IPV4][IN] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPBYTESOUT:
 			c64.high = s.bcounters[IPV4][OUT] >> 32;
 			c64.low = s.bcounters[IPV4][OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPPKTSINPASS:
 			c64.high = s.pcounters[IPV4][IN][PF_PASS] >> 32;
 			c64.low = s.pcounters[IPV4][IN][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPPKTSINDROP:
 			c64.high = s.pcounters[IPV4][IN][PF_DROP] >> 32;
 			c64.low = s.pcounters[IPV4][IN][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPPKTSOUTPASS:
 			c64.high = s.pcounters[IPV4][OUT][PF_PASS] >> 32;
 			c64.low = s.pcounters[IPV4][OUT][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IPPKTSOUTDROP:
 			c64.high = s.pcounters[IPV4][OUT][PF_DROP] >> 32;
 			c64.low = s.pcounters[IPV4][OUT][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6BYTESIN:
 			c64.high = s.bcounters[IPV6][IN] >> 32;
 			c64.low = s.bcounters[IPV6][IN] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6BYTESOUT:
 			c64.high = s.bcounters[IPV6][OUT] >> 32;
 			c64.low = s.bcounters[IPV6][OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6PKTSINPASS:
 			c64.high = s.pcounters[IPV6][IN][PF_PASS] >> 32;
 			c64.low = s.pcounters[IPV6][IN][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6PKTSINDROP:
 			c64.high = s.pcounters[IPV6][IN][PF_DROP] >> 32;
 			c64.low = s.pcounters[IPV6][IN][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6PKTSOUTPASS:
 			c64.high = s.pcounters[IPV6][OUT][PF_PASS] >> 32;
 			c64.low = s.pcounters[IPV6][OUT][PF_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case IP6PKTSOUTDROP:
 			c64.high = s.pcounters[IPV6][OUT][PF_DROP] >> 32;
 			c64.low = s.pcounters[IPV6][OUT][PF_DROP] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SRCTRACK_COUNT:
 			ulong_ret = (long) s.src_nodes;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case SRCTRACK_SEARCHES:
 			c64.high = s.scounters[SCNT_SRC_NODE_SEARCH] >> 32;
 			c64.low = s.scounters[SCNT_SRC_NODE_SEARCH] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SRCTRACK_INSERTS:
 			c64.high = s.scounters[SCNT_SRC_NODE_INSERT] >> 32;
 			c64.low = s.scounters[SCNT_SRC_NODE_INSERT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case SRCTRACK_REMOVALS:
 			c64.high = s.scounters[SCNT_SRC_NODE_REMOVALS] >> 32;
 			c64.low = s.scounters[SCNT_SRC_NODE_REMOVALS] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 						
 		default:
+			return (NULL);
 	}
 
-	return NULL;
+	/* NOTREACHED */
 }
 
 unsigned char *
@@ -524,10 +525,10 @@ var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
 			== MATCH_FAILED)
-		return NULL;
+		return (NULL);
 
 	if (dev == -1)
-		return NULL;
+		return (NULL);
 
 	memset(&pt, 0, sizeof(pt));
 	switch(vp->magic) {
@@ -609,15 +610,15 @@ var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 
 		default:
-			return NULL;
+			return (NULL);
 	}
 
 	if (ioctl(dev, DIOCGETTIMEOUT, &pt)) {
 		snmp_log(LOG_ERR, "var_timeouts: ioctl: %s\n", strerror(errno));
-		return NULL;
+		return (NULL);
 	}
 	long_ret = pt.seconds;
-	return (unsigned char *) &long_ret;
+	return ((unsigned char *) &long_ret);
 }
 
 unsigned char *
@@ -631,7 +632,7 @@ var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 		return (NULL);
 
 	if (dev == -1)
-		return NULL;
+		return (NULL);
 
 	if ((time(NULL) - pfi_table_age) > PFI_TABLE_MAXAGE)
 		pfi_refresh();
@@ -639,17 +640,17 @@ var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 	switch (vp->magic) {
 		case PF_IFNUMBER:
 			ulong_ret = pfi_count;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TANUMBER:
 			pft_refresh();
 			ulong_ret = pft_count;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 		
 		case PF_LANUMBER:
 			pfl_refresh();
 			ulong_ret = pfl_count;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		default:
 			return (NULL);
@@ -693,29 +694,29 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 		case PF_IFINDEX:
 			ulong_ret = index + 1;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_IFNAME:
 			*var_len = strlen(&pfi_table[index]);
 			free(b.pfrb_caddr);
-			return (unsigned char *) pfi_table[index];
+			return ((unsigned char *) pfi_table[index]);
 
 		case PF_IFTYPE:
 			/* XXX weak test; group names can end in digits */
 			ulong_ret = isdigit(p->pfik_name[strlen(p->pfik_name)-1]) ? 
 				PFI_IFTYPE_INSTANCE : PFI_IFTYPE_GROUP;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_IFREF:
 			ulong_ret = p->pfik_states;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_IFRULES:
 			ulong_ret = p->pfik_rules;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_IFIN4PASSPKTS:
 			c64.high = p->pfik_packets[IPV4][IN][PASS] >> 32;
@@ -804,7 +805,7 @@ var_if_table(struct variable *vp, oid *name, size_t *length, int exact,
 	
 	free(b.pfrb_caddr);
 	*var_len = sizeof(c64);
-	return (unsigned char *) &c64;
+	return ((unsigned char *) &c64);
 }
 
 unsigned char * 
@@ -854,18 +855,18 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 	switch (vp->magic) {
 		case PF_LAINDEX:
 			ulong_ret = index;
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_LANAME:
 			*var_len = strlen(pr.rule.label);
 			strlcpy(lname, pr.rule.label, sizeof(lname));
-			return (unsigned char *) lname;
+			return ((unsigned char *) lname);
 
 		case PF_LAEVALS:
 			c64.high = pr.rule.evaluations >> 32;
 			c64.low = pr.rule.evaluations & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LAPKTS:
 			c64.high = (pr.rule.packets[IN] >> 32) 
@@ -873,7 +874,7 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 			c64.low = (pr.rule.packets[IN] & 0xffffffff) 
 				+ (pr.rule.packets[OUT] & 0xffffffff);
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LABYTES:
 			c64.high = (pr.rule.bytes[IN] >> 32)
@@ -881,38 +882,38 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 			c64.low = (pr.rule.bytes[IN] & 0xffffffff)
 				+ (pr.rule.bytes[OUT] & 0xffffffff);
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LAINPKTS:
 			c64.high = pr.rule.packets[IN] >> 32;
 			c64.low = pr.rule.packets[IN] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LAINBYTES:
 			c64.high = pr.rule.bytes[IN] >> 32;
 			c64.low = pr.rule.bytes[IN] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LAOUTPKTS:
 			c64.high = pr.rule.packets[OUT] >> 32;
 			c64.low = pr.rule.packets[OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		case PF_LAOUTBYTES:
 			c64.high = pr.rule.bytes[OUT] >> 32;
 			c64.low = pr.rule.bytes[OUT] & 0xffffffff;
 			*var_len = sizeof(c64);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		default:
 			return (NULL);
 	}
 
 	*var_len = sizeof(c64);
-	return (unsigned char *) &c64;
+	return ((unsigned char *) &c64);
 }
 
 unsigned char *
@@ -960,28 +961,28 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 		case PF_TAINDEX:
 			ulong_ret = index;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TANAME:
 			*var_len = strlen(ts->pfrts_name);
 			strlcpy(tname, ts->pfrts_name, sizeof(tname));
 			free(b.pfrb_caddr);
-			return (unsigned char *) tname;
+			return ((unsigned char *) tname);
 
 		case PF_TAADDRESSES:
 			ulong_ret = ts->pfrts_cnt;
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TAANCHORREFS:
 			ulong_ret = ts->pfrts_refcnt[PFR_REFCNT_ANCHOR];
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TARULEREFS:
 			ulong_ret = ts->pfrts_refcnt[PFR_REFCNT_RULE];
 			free(b.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TAEVALSMATCH:
 			c64.high = ts->pfrts_match >> 32;
@@ -1065,7 +1066,7 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 
 	free(b.pfrb_caddr);
 	*var_len = sizeof(c64);
-	return (unsigned char *) &c64;
+	return ((unsigned char *) &c64);
 }
 
 /* this function returns OIDs of the form
@@ -1159,79 +1160,79 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 		case PF_TADDRTABLEINDEX:
 			ulong_ret = table_index;
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 			
 		case PF_TADDRNET:
 			cp = (u_char *)&as->pfras_a.pfra_u;
 			memcpy((char *)&ulong_ret, cp, 4);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 			
 		case PF_TADDRMASK:
 			ulong_ret = as->pfras_a.pfra_net;
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 			
 		case PF_TADDRCLEARED:
 			ulong_ret = (long) (time(NULL) - as->pfras_tzero) * 100;
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &ulong_ret;
+			return ((unsigned char *) &ulong_ret);
 
 		case PF_TADDRINBLOCKPKTS:
 			c64.high = as->pfras_packets[IN][PFR_OP_BLOCK] >> 32;
 			c64.low = as->pfras_packets[IN][PFR_OP_BLOCK] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDRINBLOCKBYTES:
 			c64.high = as->pfras_bytes[IN][PFR_OP_BLOCK] >> 32;
 			c64.low = as->pfras_bytes[IN][PFR_OP_BLOCK] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDRINPASSPKTS:
 			c64.high = as->pfras_packets[IN][PFR_OP_PASS] >> 32;
 			c64.low = as->pfras_packets[IN][PFR_OP_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDRINPASSBYTES:
 			c64.high = as->pfras_bytes[IN][PFR_OP_PASS] >> 32;
 			c64.low = as->pfras_bytes[IN][PFR_OP_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDROUTBLOCKPKTS:
 			c64.high = as->pfras_packets[OUT][PFR_OP_BLOCK] >> 32;
 			c64.low = as->pfras_packets[OUT][PFR_OP_BLOCK] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDROUTBLOCKBYTES:
 			c64.high = as->pfras_bytes[OUT][PFR_OP_BLOCK] >> 32;
 			c64.low = as->pfras_bytes[OUT][PFR_OP_BLOCK] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDROUTPASSPKTS:
 			c64.high = as->pfras_packets[OUT][PFR_OP_PASS] >> 32;
 			c64.low = as->pfras_packets[OUT][PFR_OP_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 			
 		case PF_TADDROUTPASSBYTES:
 			c64.high = as->pfras_bytes[OUT][PFR_OP_PASS] >> 32;
 			c64.low = as->pfras_bytes[OUT][PFR_OP_PASS] & 0xffffffff;
 			*var_len = sizeof(c64);
 			free(ba.pfrb_caddr);
-			return (unsigned char *) &c64;
+			return ((unsigned char *) &c64);
 
 		default:
 			free(ba.pfrb_caddr);

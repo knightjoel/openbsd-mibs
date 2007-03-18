@@ -18,12 +18,11 @@
  */
 
 
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/sensors.h>
+#include <errno.h>
+#include <string.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
