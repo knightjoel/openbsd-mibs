@@ -237,12 +237,11 @@ var_limits(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 						
 		default:
-			ERROR_MSG("");
 			return NULL;
 	}
 
 	if (ioctl(dev, DIOCGETLIMIT, &pl)) {
-		ERROR_MSG("ioctl error doing DIOCGETLIMIT");
+		snmp_log(LOG_ERR, "var_limits: ioctl: %s\n", strerror(errno));
 		return NULL;
 	}
 	ulong_ret = pl.limit;
@@ -270,7 +269,8 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 
 	memset(&s, 0, sizeof(s));
 	if (ioctl(dev, DIOCGETSTATUS, &s)) {
-		ERROR_MSG("ioctl error doing DIOCGETSTATUS");
+		snmp_log(LOG_ERR, "var_pfMIBObjects: ioctl: %s\n",
+				strerror(errno));
 		return NULL;
 	}
 
@@ -509,7 +509,6 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &c64;
 						
 		default:
-			ERROR_MSG("");
 	}
 
 	return NULL;
@@ -610,12 +609,11 @@ var_timeouts(struct variable *vp, oid *name, size_t *length, int exact,
 			break;
 
 		default:
-			ERROR_MSG("");
 			return NULL;
 	}
 
 	if (ioctl(dev, DIOCGETTIMEOUT, &pt)) {
-		ERROR_MSG("ioctl error doing DIOCGETTIMEOUT");
+		snmp_log(LOG_ERR, "var_timeouts: ioctl: %s\n", strerror(errno));
 		return NULL;
 	}
 	long_ret = pt.seconds;
@@ -654,7 +652,6 @@ var_table_number(struct variable *vp, oid *name, size_t *length, int exact,
 			return (unsigned char *) &ulong_ret;
 
 		default:
-			ERROR_MSG("");
 			return (NULL);
 	}
 }
@@ -835,7 +832,8 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 
 	memset(&pr, 0, sizeof(pr));
 	if (ioctl(dev, DIOCGETRULES, &pr)) {
-		ERROR_MSG("ioctl error doing DIOCGETRULES");
+		snmp_log(LOG_ERR, "var_labels_table: ioctl: %s\n",
+			strerror(errno));
 		return (NULL);
 	}
 
@@ -843,7 +841,8 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 	for (nr = 0; nr < mnr; ++nr) {
 		pr.nr = nr;
 		if (ioctl(dev, DIOCGETRULE, &pr)) {
-			ERROR_MSG("ioctl error doing DIOCGETRULE");
+			snmp_log(LOG_ERR, "var_labels_table: ioctl: %s\n",
+				strerror(errno));
 			return (NULL);
 		}
 
@@ -931,7 +930,8 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 		return (NULL);
 	
 	if (pft_get(&b) || b.pfrb_size == 0) {
-		ERROR_MSG("error getting table list: pft_get() failed");
+		snmp_log(LOG_ERR,
+			"var_tables_table: can't get list of pf tables\n");
 		return (NULL);
 	}
 
@@ -1096,7 +1096,8 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 		return (NULL);
 
 	if (pft_get(&bt) || bt.pfrb_size == 0) {
-		ERROR_MSG("error getting table list: pft_get() failed");
+		snmp_log(LOG_ERR,
+			"var_tbl_addr_table: can't get list of pf tables\n");
 		return (NULL);
 	}
 
@@ -1114,7 +1115,10 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (NULL);
 		}
 		if (pftable_addr_get(&ba, &filter) || ba.pfrb_size == 0) {
-			ERROR_MSG("error getting address list: pftable_addr_get() failed");
+			snmp_log(LOG_ERR,
+				"var_tbl_addr_table: "
+				"can't get list of addrs for pf table %s\n",
+				filter.pfrt_name);
 			continue;
 		}
 		PFRB_FOREACH(as, &ba) {
@@ -1244,7 +1248,9 @@ pfi_get(struct pfr_buffer *b, const char *filter)
 		pfr_buf_grow(b, b->pfrb_size);
 		b->pfrb_size = b->pfrb_msize;
 		if (pfi_get_ifaces(filter, b->pfrb_caddr, &(b->pfrb_size))) {
-			ERROR_MSG("pfi_get_ifaces() failed");
+			snmp_log(LOG_ERR,
+				"pfi_get: can't get pf interface %s\n",
+				filter);
 			return (1);
 		}
 		if (b->pfrb_size <= b->pfrb_msize)
@@ -1267,7 +1273,8 @@ pft_get(struct pfr_buffer *b)
 		pfr_buf_grow(b, b->pfrb_size);
 		b->pfrb_size = b->pfrb_msize;
 		if (pfr_get_tstats(&filter, b->pfrb_caddr, &(b->pfrb_size), 0)) {
-			ERROR_MSG("pft_get_tstats() failed");
+			snmp_log(LOG_ERR,
+				"pft_get: can't get pf table stats\n");
 			return (1);
 		}
 		if (b->pfrb_size <= b->pfrb_msize)
@@ -1305,7 +1312,7 @@ pfi_refresh(void)
 	int i, match=0;
 
 	if (pfi_get(&b, NULL)) {
-		ERROR_MSG("Could not get list of interfaces");
+		snmp_log(LOG_ERR, "pfi_refresh: can't get list of interfaces\n");
 		return (1);
 	}
 
@@ -1336,7 +1343,7 @@ pfl_refresh(void)
 	pfl_count = 0;
 	memset(&pr, 0, sizeof(pr));
 	if (ioctl(dev, DIOCGETRULES, &pr)) {
-		ERROR_MSG("ioctl error doing DIOCGETRULES");
+		snmp_log(LOG_ERR, "pfl_refresh: ioctl: %s\n", strerror(errno));
 		return (NULL);
 	}
 
@@ -1344,7 +1351,8 @@ pfl_refresh(void)
 	for (nr = 0; nr < mnr; ++nr) {
 		pr.nr = nr;
 		if (ioctl(dev, DIOCGETRULE, &pr)) {
-			ERROR_MSG("ioctl error doing DIOCGETRULE");
+			snmp_log(LOG_ERR, "pfl_refresh: ioctl: %s\n",
+				strerror(errno));
 			return (NULL);
 		}
 
@@ -1363,7 +1371,7 @@ pft_refresh(void)
 	struct pfr_tstats *ts = NULL;
 
 	if (pft_get(&b)) {
-		ERROR_MSG("Could not get list of tables");
+		snmp_log(LOG_ERR, "pft_refresh: can't get list of pf tables\n");
 		return (1);
 	}
 
@@ -1387,7 +1395,7 @@ pfi_get_ifaces(const char *filter, struct pfi_kif *buf, int *size)
 	struct pfioc_iface io;
 
 	if (size == NULL || *size < 0 || (*size && buf == NULL)) {
-		ERROR_MSG("pfi_get_ifaces(): failed");
+		snmp_log(LOG_DEBUG, "pfi_get_ifaces: failed\n");
 		return (-1);
 	}
 
@@ -1395,7 +1403,7 @@ pfi_get_ifaces(const char *filter, struct pfi_kif *buf, int *size)
 	if (filter != NULL) {
 		if (strlcpy(io.pfiio_name, filter, sizeof(io.pfiio_name)) >=
 			sizeof(io.pfiio_name)) {
-			ERROR_MSG("strlcpy(): source buffer too large");
+			snmp_log(LOG_ERR, "pfi_get_ifaces: strlcpy failed\n");
 			return (-1);
 		}
 	}
@@ -1403,7 +1411,8 @@ pfi_get_ifaces(const char *filter, struct pfi_kif *buf, int *size)
 	io.pfiio_esize = sizeof(*buf);
 	io.pfiio_size = *size;
 	if (ioctl(dev, DIOCIGETIFACES, &io)) {
-		ERROR_MSG("ioctl(): DIOCGETIFACES failed");
+		snmp_log(LOG_ERR, "pfi_get_ifaces: ioctl: %s\n",
+			strerror(errno));
 		return (-1);
 	}
 	*size = io.pfiio_size;
