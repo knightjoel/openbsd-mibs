@@ -34,6 +34,9 @@
 #define SENS_UNITS		7
 #define SENS_STATUS		8
 
+/* index an arbitrary number of sensors (not devices) */
+#define SINDEX_MAX 100
+
 config_require(util_funcs)
 
 FindVarMethod var_sensors;
@@ -41,10 +44,12 @@ FindVarMethod var_sensors_table;
 
 
 void		 init_sensorsMIBObjects(void);
-int		 sensor_count(void);
-int		 sensor_get(int, struct sensor *);
+void		 sensor_enumerate(struct sensordev *);
+void		 sensor_desc(u_int, struct sensor *, char *, size_t);
+int		 sensor_get(u_int, struct sensordev *, struct sensor *);
 void		 sensor_units(struct sensor *, char *);
 void		 sensor_value(struct sensor *, char *);
+void		 sensor_refresh(void);
 unsigned char	*var_sensors(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_sensors_table(struct variable *, oid *, size_t *, int,

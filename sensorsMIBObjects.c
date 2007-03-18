@@ -19,6 +19,7 @@
 
 
 #include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -30,6 +31,8 @@
 
 #include "sensorsMIBObjects.h"
 
+unsigned int num_sensors = 0;
+int **sindex;
 
 oid sensorsMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,2 };
 
@@ -47,27 +50,44 @@ struct variable4 sensorsMIBObjects_variables[] = {
 
 
 void init_sensorsMIBObjects(void) {
-	REGISTER_MIB("sensorsMIBObjects", sensorsMIBObjects_variables, variable4,
-			sensorsMIBObjects_variables_oid);
+	int i;
+
+	if ((sindex = (int *)malloc(SINDEX_MAX * sizeof(int))) == NULL) {
+		snmp_log(LOG_ERR, "init_sensorsMIBObjects: malloc: %s\n", 
+				strerror(errno));
+		snmp_log(LOG_ERR, "sensorsMIBObjects not loaded\n");
+		return;
+	}
+	for (i = 0; i < SINDEX_MAX; i++) {
+		if ((sindex[i] = (int *)malloc(3 * sizeof(int))) == NULL) {
+			snmp_log(LOG_ERR, 
+					"init_sensorsMIBObjects: malloc: %s\n", 
+					strerror(errno));
+			snmp_log(LOG_ERR, "sensorsMIBObjects not loaded\n");
+			free(sindex);
+			return;
+		}
+	}
+
+	REGISTER_MIB("sensorsMIBObjects", sensorsMIBObjects_variables,
+			variable4, sensorsMIBObjects_variables_oid);
 }
 
 unsigned char *
 var_sensors(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
-	int cnt;
 	static u_long ulong_ret;
 
 	if (header_generic(vp, name, length, exact, var_len, write_method)
 			== MATCH_FAILED)
 		return (NULL);
 
-	if ((cnt = sensor_count()) == -1)
-		return (NULL);
+	sensor_refresh();
 
 	switch(vp->magic) {
 		case SENS_NUMBER:
-			ulong_ret = cnt;
+			ulong_ret = num_sensors;
 			break;
 		default:
 			return (NULL);
@@ -81,41 +101,40 @@ unsigned char *
 var_sensors_table(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
-	int index, cnt, rv;
+	int index;
 	struct sensor sensor;
+	struct sensordev sdev;
 	static u_long ulong_ret;
 	static unsigned char str[BUFSIZ];
 
-	if ((cnt = sensor_count()) == -1)
+	sensor_refresh();
+
+	if (num_sensors == 0)
 		return (NULL);
 
-	if (header_simple_table(vp, name, length, exact, var_len, write_method, cnt)
+	if (header_simple_table(vp, name, length, exact, var_len,
+				write_method, num_sensors)
 			== MATCH_FAILED)
 		return (NULL);
 
 	index = name[*length-1]-1;
-	while ((rv = sensor_get(index, &sensor)) != 0) {
-		if (rv < 0)
-			index++;
-		else
-			return (NULL);
-	}
+	if (sensor_get(index, &sdev, &sensor))
+		return (NULL);
 
 	switch (vp->magic) {
 		case SENS_INDEX:
 			ulong_ret = name[*length-1];
 			return (unsigned char *) &ulong_ret;
 		case SENS_DESCR:
-			if ((*var_len = strlcpy(str, sensor.desc, BUFSIZ)) !=
-					strlen(sensor.desc))
-				return (NULL);
+			sensor_desc(index, &sensor, str, BUFSIZ);
+			*var_len = strlen(str);
 			return (unsigned char *) str;
 		case SENS_TYPE:
 			ulong_ret = sensor.type;
 			return (unsigned char *) &ulong_ret;
 		case SENS_DEVICE:
-			if ((*var_len = strlcpy(str, sensor.device, BUFSIZ)) !=
-					strlen(sensor.device))
+			if ((*var_len = strlcpy(str, sdev.xname, BUFSIZ)) !=
+					strlen(sdev.xname))
 				return (NULL);
 			return (unsigned char *) str;
 		case SENS_VALUE:
@@ -136,55 +155,107 @@ var_sensors_table(struct variable *vp, oid *name, size_t *length, int exact,
 	/* NOTREACHED */
 }
 
-int
-sensor_count(void)
+void
+sensor_refresh(void)
 {
-	struct sensor sensor;
-	int mib[3], i, count;
+	struct sensordev sdev;
+	int mib[3], i;
 	size_t len;
 
 	mib[0] = CTL_HW;
 	mib[1] = HW_SENSORS;
-	len = sizeof(sensor);
-	count = 0;
+	len = sizeof(struct sensordev);
 
-	for (i = 0; i < 256; i++) {
+	num_sensors = 0;
+
+	for (i = 0; i < MAXSENSORDEVICES; i++) {
 		mib[2] = i;
-		if (sysctl(mib, 3, &sensor, &len, NULL, 0) == -1) {
+		if (sysctl(mib, 3, &sdev, &len, NULL, 0) == -1) {
 			if (errno != ENOENT)
-				return (-1);
-			else if (errno == ENOENT)
-				continue;
-		}
-		if (sensor.flags & SENSOR_FINVALID)
+				snmp_log(LOG_DEBUG,
+					"sensor_refresh: sysctl: %s\n",
+					strerror(errno));
 			continue;
-		count++;
+		}
+		sensor_enumerate(&sdev);
 	}
+}
 
-	return (count);
+void
+sensor_enumerate(struct sensordev *sdev)
+{
+	struct sensor s;
+	int mib[5], type, idx;
+	size_t len;
+
+	mib[0] = CTL_HW;
+	mib[1] = HW_SENSORS;
+	mib[2] = sdev->num;
+
+	/* iterate sensor types */
+	for (type = 0; type < SENSOR_MAX_TYPES; type++) {
+		mib[3] = type;
+		/* iterate each sensor of type 'type' */
+		for (idx = 0; idx < sdev->maxnumt[type]; idx++) {
+			mib[4] = idx;
+			len = sizeof(struct sensor);
+			if (sysctl(mib, 5, &s, &len, NULL, 0) == -1) {
+				snmp_log(LOG_DEBUG,
+					"sensor_enumerate: sysctl: %s\n",
+					strerror(errno));
+				continue;
+			}
+			if (len && (s.flags & SENSOR_FINVALID) == 0
+				&& num_sensors < SINDEX_MAX) {
+				sindex[num_sensors][0] = mib[2];
+				sindex[num_sensors][1] = mib[3];
+				sindex[num_sensors][2] = mib[4];
+				num_sensors++;
+			}
+		}
+	}
 }
 
 int
-sensor_get(int index, struct sensor *s)
+sensor_get(u_int index, struct sensordev *sdev, struct sensor *s)
 {
-	int mib[3];
+	int mib[5];
 	size_t len;
 
 	mib[0] = CTL_HW;
 	mib[1] = HW_SENSORS;
-	mib[2] = index;
-	len = sizeof(struct sensor);
+	mib[2] = sindex[index][0];
+	mib[3] = sindex[index][1];
+	mib[4] = sindex[index][2];
 
-	if (sysctl(mib, 3, s, &len, NULL, 0) == -1) {
+	len = sizeof(struct sensordev);
+	if (sysctl(mib, 3, sdev, &len, NULL, 0) == -1) {
 		if (errno == ENOENT)
 			return (-1);
 		else
 			return (1);
 	}
-	if (s->flags & SENSOR_FINVALID)
-		return (-1);
+
+	len = sizeof(struct sensor);
+	if (sysctl(mib, 5, s, &len, NULL, 0) == -1) {
+		if (errno == ENOENT)
+			return (-1);
+		else
+			return (1);
+	}
 
 	return (0);
+}
+
+void
+sensor_desc(u_int index, struct sensor *s, char *desc, size_t len)
+{
+	if (strlen(s->desc) == 0) {
+		snprintf(desc, len, "%s%d", 
+			sensor_type_s[s->type], sindex[index][2]);
+	} else {
+		snprintf(desc, len, "%s", s->desc);
+	}
 }
 
 void
