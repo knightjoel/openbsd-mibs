@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <netinet/ip_carp.h>
 
+#include <kvm.h>
 #include <errno.h>
 
 #include <net-snmp/net-snmp-config.h>
@@ -53,10 +54,31 @@ struct variable4 carpMIBObjects_variables[] = {
   { CARPIF_ADVBASE	, ASN_INTEGER	, RONLY , var_carpif_table, 4, { 2,2,1,5 } },
   { CARPIF_ADVSKEW	, ASN_INTEGER	, RONLY , var_carpif_table, 4, { 2,2,1,6 } },
   { CARPIF_STATE	, ASN_INTEGER	, RONLY , var_carpif_table, 4, { 2,2,1,7 } },
+  { CARP_IPRECV		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,1 } },
+  { CARP_IP6RECV	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,2 } },
+  { CARP_BADIF		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,3 } },
+  { CARP_BADTTL		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,4 } },
+  { CARP_HDROPS		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,5 } },
+  { CARP_BADCHKSUM	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,6 } },
+  { CARP_BADVER		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,7 } },
+  { CARP_TOOSHORT	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,8 } },
+  { CARP_BADAUTH	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,9 } },
+  { CARP_BADVHID	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,10 } },
+  { CARP_BADADDRS	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,11 } },
+  { CARP_IPSENT		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,12 } },
+  { CARP_IP6SENT	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,13 } },
+  { CARP_NOMEM		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,14 } },
 };
 
 
 void init_carpMIBObjects(void) {
+	extern kvm_t *kd;
+
+	if (kvm_nlist(kd, nl)) {
+		snmp_log(LOG_ERR, "init_carpMIBObjects: no namelist\n");
+		return;
+	}
+
 	REGISTER_MIB("carpMIBObjects", carpMIBObjects_variables, variable4,
 			carpMIBObjects_variables_oid);
 }
@@ -135,6 +157,91 @@ var_carpif_table(struct variable *vp, oid *name, size_t *length, int exact,
 	}
 	
 	/* NOTREACHED */
+}
+
+unsigned char *
+var_carp_stats(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct carpstats carpstat;
+	static struct counter64 c64;
+
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+			== MATCH_FAILED)
+		return (NULL);
+
+	/* XXX should use a #define */
+	if (nl[0].n_value == 0)
+		return (NULL);
+	if (klookup(nl[0].n_value, &carpstat, sizeof(carpstat)) == 0)
+		return (NULL);
+
+	switch(vp->magic) {
+		case CARP_IPRECV:
+			c64.high = carpstat.carps_ipackets >> 32;
+			c64.low = carpstat.carps_ipackets & 0xffffffff;
+			break;
+		case CARP_IP6RECV:
+			c64.high = carpstat.carps_ipackets6 >> 32;
+			c64.low = carpstat.carps_ipackets6 & 0xffffffff;
+			break;
+		case CARP_BADIF:
+			c64.high = carpstat.carps_badif >> 32;
+			c64.low = carpstat.carps_badif & 0xffffffff;
+			break;
+		case CARP_BADTTL:
+			c64.high = carpstat.carps_badttl >> 32;
+			c64.low = carpstat.carps_badttl & 0xffffffff;
+			break;
+		case CARP_HDROPS:
+			c64.high = carpstat.carps_hdrops >> 32;
+			c64.low = carpstat.carps_hdrops & 0xffffffff;
+			break;
+		case CARP_BADCHKSUM:
+			c64.high = carpstat.carps_badsum >> 32;
+			c64.low = carpstat.carps_badsum & 0xffffffff;
+			break;
+		case CARP_BADVER:
+			c64.high = carpstat.carps_badver >> 32;
+			c64.low = carpstat.carps_badver & 0xffffffff;
+			break;
+		case CARP_TOOSHORT:
+			c64.high = carpstat.carps_badlen >> 32;
+			c64.low = carpstat.carps_badlen & 0xffffffff;
+			break;
+		case CARP_BADAUTH:
+			c64.high = carpstat.carps_badauth >> 32;
+			c64.low = carpstat.carps_badauth & 0xffffffff;
+			break;
+		case CARP_BADVHID:
+			c64.high = carpstat.carps_badvhid >> 32;
+			c64.low = carpstat.carps_badvhid & 0xffffffff;
+			break;
+		case CARP_BADADDRS:
+			c64.high = carpstat.carps_badaddrs >> 32;
+			c64.low = carpstat.carps_badaddrs & 0xffffffff;
+			break;
+		case CARP_IPSENT:
+			c64.high = carpstat.carps_opackets >> 32;
+			c64.low = carpstat.carps_opackets & 0xffffffff;
+			break;
+		case CARP_IP6SENT:
+			c64.high = carpstat.carps_opackets6 >> 32;
+			c64.low = carpstat.carps_opackets6 & 0xffffffff;
+			break;
+		case CARP_NOMEM:
+			c64.high = carpstat.carps_onomem >> 32;
+			c64.low = carpstat.carps_onomem & 0xffffffff;
+			break;
+		default:
+			snmp_log(LOG_ERR,
+				"var_carp_stats: can't find magic %u\n",
+				vp->magic);
+			return (NULL);
+	}
+
+	*var_len = sizeof(c64);
+	return ((unsigned char *) &c64);
 }
 
 unsigned char *
