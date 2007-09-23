@@ -27,6 +27,7 @@
 #include <net/if.h>
 #include <net/pfvar.h>
 
+#include <kvm.h>
 
 #define RUNNING			1
 #define RUNTIME			2
@@ -155,6 +156,22 @@
 #define PF_LAINBYTES		190
 #define PF_LAOUTPKTS		191
 #define PF_LAOUTBYTES		192
+#define PFSYNC_IPRECV		193
+#define PFSYNC_IP6RECV		194
+#define PFSYNC_BADIF		195
+#define PFSYNC_BADTTL		196
+#define PFSYNC_HDROPS		197
+#define PFSYNC_BADVER		198
+#define PFSYNC_BADACT		199
+#define PFSYNC_BADLEN		200
+#define PFSYNC_BADAUTH		201
+#define PFSYNC_STALE		202
+#define PFSYNC_BADVAL		203
+#define PFSYNC_BADSTATE		204
+#define PFSYNC_IPSENT		205
+#define PFSYNC_IP6SENT		206
+#define PFSYNC_NOMEM		207
+#define PFSYNC_OERR		208
 
 
 #define PFI_IFTYPE_GROUP	0
@@ -166,6 +183,15 @@ enum { IPV4, IPV6 };
 enum { PASS, BLOCK };
 
 enum { PFRB_TSTATS = 1, PFRB_ASTATS, PFRB_IFACES, PFRB_MAX };
+
+struct nlist nl[] = {
+	{ "_carpstats" },
+#define _CARPSTATS 0
+	{ "_pfsyncstats" },
+#define _PFSYNCSTATS 1
+	{ "" }
+};
+
 
 config_require(util_funcs)
 
@@ -197,6 +223,8 @@ void		*pfr_buf_next(struct pfr_buffer *, const void *);
 unsigned char	*var_if_table(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_pfMIBObjects(struct variable *, oid *, size_t *, int,
+	size_t *, WriteMethod **);
+unsigned char	*var_pfsync_stats(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);
 unsigned char	*var_limits(struct variable *, oid *, size_t *, int,
 	size_t *, WriteMethod **);

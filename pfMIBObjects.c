@@ -26,6 +26,7 @@
 #include <net/if.h>
 #include <net/pfvar.h>
 #include <arpa/inet.h>
+#include <net/if_pfsync.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -187,10 +188,33 @@ struct variable4 pfMIBObjects_variables[] = {
   { PF_LAINBYTES	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,7 } },
   { PF_LAOUTPKTS	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,8 } },
   { PF_LAOUTBYTES	, ASN_COUNTER64	, RONLY	, var_labels_table, 4, { 10,128,1,9 } },
+  { PFSYNC_IPRECV	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,1 } },
+  { PFSYNC_IP6RECV	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,2 } },
+  { PFSYNC_BADIF	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,3 } },
+  { PFSYNC_BADTTL	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,4 } },
+  { PFSYNC_HDROPS	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,5 } },
+  { PFSYNC_BADVER	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,6 } },
+  { PFSYNC_BADACT	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,7 } },
+  { PFSYNC_BADLEN	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,8 } },
+  { PFSYNC_BADAUTH	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,9 } },
+  { PFSYNC_STALE	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,10 } },
+  { PFSYNC_BADVAL	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,11 } },
+  { PFSYNC_BADSTATE	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,12 } },
+  { PFSYNC_IPSENT	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,13 } },
+  { PFSYNC_IP6SENT	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,14 } },
+  { PFSYNC_NOMEM	, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,15 } },
+  { PFSYNC_OERR		, ASN_COUNTER64	, RONLY	, var_pfsync_stats, 2, { 11,16 } }
 };
 
 
 void init_pfMIBObjects(void) {
+	extern kvm_t *kd;
+
+	if (kvm_nlist(kd, nl)) {
+		snmp_log(LOG_ERR, "init_pfMIBObjects: no namelist\n");
+		return;
+	}
+
 	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable4,
 			pfMIBObjects_variables_oid);
 
@@ -513,6 +537,98 @@ var_pfMIBObjects(struct variable *vp, oid *name, size_t *length, int exact,
 	}
 
 	/* NOTREACHED */
+}
+
+unsigned char *
+var_pfsync_stats(struct variable *vp, oid *name, size_t *length, int exact,
+		size_t *var_len, WriteMethod **write_method)
+{
+	struct pfsyncstats pfsyncstat;
+	static struct counter64 c64;
+
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+			== MATCH_FAILED)
+		return (NULL);
+
+	if (nl[_PFSYNCSTATS].n_value == 0)
+		return (NULL);
+	if (klookup(nl[_PFSYNCSTATS].n_value, &pfsyncstat, sizeof(pfsyncstat)) == 0)
+		return (NULL);
+
+	switch(vp->magic) {
+		case PFSYNC_IPRECV:
+			c64.high = pfsyncstat.pfsyncs_ipackets >> 32;
+			c64.low = pfsyncstat.pfsyncs_ipackets & 0xffffffff;
+			break;
+		case PFSYNC_IP6RECV:
+			c64.high = pfsyncstat.pfsyncs_ipackets6 >> 32;
+			c64.low = pfsyncstat.pfsyncs_ipackets6 & 0xffffffff;
+			break;
+		case PFSYNC_BADIF:
+			c64.high = pfsyncstat.pfsyncs_badif >> 32;
+			c64.low = pfsyncstat.pfsyncs_badif & 0xffffffff;
+			break;
+		case PFSYNC_BADTTL:
+			c64.high = pfsyncstat.pfsyncs_badttl >> 32;
+			c64.low = pfsyncstat.pfsyncs_badttl & 0xffffffff;
+			break;
+		case PFSYNC_HDROPS:
+			c64.high = pfsyncstat.pfsyncs_hdrops >> 32;
+			c64.low = pfsyncstat.pfsyncs_hdrops & 0xffffffff;
+			break;
+		case PFSYNC_BADVER:
+			c64.high = pfsyncstat.pfsyncs_badver >> 32;
+			c64.low = pfsyncstat.pfsyncs_badver & 0xffffffff;
+			break;
+		case PFSYNC_BADACT:
+			c64.high = pfsyncstat.pfsyncs_badact >> 32;
+			c64.low = pfsyncstat.pfsyncs_badact & 0xffffffff;
+			break;
+		case PFSYNC_BADLEN:
+			c64.high = pfsyncstat.pfsyncs_badlen >> 32;
+			c64.low = pfsyncstat.pfsyncs_badlen & 0xffffffff;
+			break;
+		case PFSYNC_BADAUTH:
+			c64.high = pfsyncstat.pfsyncs_badauth >> 32;
+			c64.low = pfsyncstat.pfsyncs_badauth & 0xffffffff;
+			break;
+		case PFSYNC_STALE:
+			c64.high = pfsyncstat.pfsyncs_stale >> 32;
+			c64.low = pfsyncstat.pfsyncs_stale & 0xffffffff;
+			break;
+		case PFSYNC_BADVAL:
+			c64.high = pfsyncstat.pfsyncs_badval >> 32;
+			c64.low = pfsyncstat.pfsyncs_badval & 0xffffffff;
+			break;
+		case PFSYNC_BADSTATE:
+			c64.high = pfsyncstat.pfsyncs_badstate >> 32;
+			c64.low = pfsyncstat.pfsyncs_badstate & 0xffffffff;
+			break;
+		case PFSYNC_IPSENT:
+			c64.high = pfsyncstat.pfsyncs_opackets >> 32;
+			c64.low = pfsyncstat.pfsyncs_opackets & 0xffffffff;
+			break;
+		case PFSYNC_IP6SENT:
+			c64.high = pfsyncstat.pfsyncs_opackets6 >> 32;
+			c64.low = pfsyncstat.pfsyncs_opackets6 & 0xffffffff;
+			break;
+		case PFSYNC_NOMEM:
+			c64.high = pfsyncstat.pfsyncs_onomem >> 32;
+			c64.low = pfsyncstat.pfsyncs_onomem & 0xffffffff;
+			break;
+		case PFSYNC_OERR:
+			c64.high = pfsyncstat.pfsyncs_oerrors >> 32;
+			c64.low = pfsyncstat.pfsyncs_oerrors & 0xffffffff;
+			break;
+		default:
+			snmp_log(LOG_ERR,
+				"var_pfsync_stats: can't find magic %u\n",
+				vp->magic);
+			return (NULL);
+	}
+
+	*var_len = sizeof(c64);
+	return ((unsigned char *) &c64);
 }
 
 unsigned char *

@@ -60,6 +60,7 @@ timeouts			OBJECT IDENTIFIER ::= { pfMIBObjects 7 }
 interfaces			OBJECT IDENTIFIER ::= { pfMIBObjects 8 }
 tables				OBJECT IDENTIFIER ::= { pfMIBObjects 9 }
 labels				OBJECT IDENTIFIER ::= { pfMIBObjects 10 }
+pfsyncStats			OBJECT IDENTIFIER ::= { pfMIBObjects 11 }
 
 -- info
 
@@ -1309,6 +1310,143 @@ lblOutBytes OBJECT-TYPE
 	"The number of outgoing bytes matched by the rule."
 	::= { lblEntry 9 }
 
+-- pfsyncStats
+
+pfsyncIpPktsRecv OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of IPv4 pfsync packets received on all interfaces."
+	::= { pfsyncStats 1 }
+
+pfsyncIp6PktsRecv OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of IPv6 pfsync packets received on all interfaces."
+	::= { pfsyncStats 2 }
+
+pfsyncPktDiscardsForBadInterface OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded because it was received
+	on an interface that is not running pfsync."
+	::= { pfsyncStats 3 }
+
+pfsyncPktDiscardsForBadTtl OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to having a TTL less
+	than 255."
+	::= { pfsyncStats 4 }
+
+pfsyncPktShorterThanHeader OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets received that had a length shorter
+	than the pfsync packet header."
+	::= { pfsyncStats 5 }
+
+pfsyncPktDiscardsForBadVersion OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to incorrect protocol
+	version."
+	::= { pfsyncStats 6 }
+
+pfsyncPktDiscardsForBadAction OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to an invalid pfsync
+	action in the header."
+	::= { pfsyncStats 7 }
+
+pfsyncPktDiscardsForBadLength OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to incorrect size."
+	::= { pfsyncStats 8 }
+
+pfsyncPktDiscardsForBadAuth OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to authentication failure."
+	::= { pfsyncStats 9 }
+
+pfsyncPktDiscardsForStaleState OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded because they tried to update
+	a stale state entry."
+	::= { pfsyncStats 10 }
+
+pfsyncPktDiscardsForBadValues OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to containing bad values."
+	::= { pfsyncStats 11 }
+
+pfsyncPktDiscardsForBadState OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets discarded due to state insert/lookup
+	failure."
+	::= { pfsyncStats 12 }
+
+pfsyncIpPktsSent OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of IPv4 pfsync packets sent on all interfaces."
+	::= { pfsyncStats 13 }
+
+pfsyncIp6PktsSent OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of IPv6 pfsync packets sent on all interfaces."
+	::= { pfsyncStats 14 }
+
+pfsyncNoMemory OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets which could not be sent due to
+	insufficient memory."
+	::= { pfsyncStats 15 }
+
+pfsyncOutputErrors OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of pfsync packets which could not be sent."
+	::= { pfsyncStats 16 }
 
 
 -- END:  Don't forget this!
