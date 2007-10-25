@@ -57,6 +57,12 @@ size_t buf_esize[PFRB_MAX] = { 0,
 	sizeof(struct pfi_kif)
 };
 
+struct nlist pf_nl[] = {
+       { "_pfsyncstats" },
+#define _PFSYNCSTATS  0
+       { "" }
+};
+
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
 
 struct variable4 pfMIBObjects_variables[] = {

@@ -38,6 +38,12 @@
 #include "carpMIBObjects.h"
 
 
+struct nlist carp_nl[] = {
+       { "_carpstats" },
+#define _CARPSTATS  0
+       { "" }
+};
+
 oid carpMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,3 };
 
 struct variable4 carpMIBObjects_variables[] = {
