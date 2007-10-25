@@ -74,7 +74,7 @@ struct variable4 carpMIBObjects_variables[] = {
 void init_carpMIBObjects(void) {
 	extern kvm_t *kd;
 
-	if (kvm_nlist(kd, nl)) {
+	if (kvm_nlist(kd, carp_nl)) {
 		snmp_log(LOG_ERR, "init_carpMIBObjects: no namelist\n");
 		return;
 	}
@@ -170,10 +170,9 @@ var_carp_stats(struct variable *vp, oid *name, size_t *length, int exact,
 			== MATCH_FAILED)
 		return (NULL);
 
-	/* XXX should use a #define */
-	if (nl[0].n_value == 0)
+	if (carp_nl[_CARPSTATS].n_value == 0)
 		return (NULL);
-	if (klookup(nl[0].n_value, &carpstat, sizeof(carpstat)) == 0)
+	if (klookup(carp_nl[_CARPSTATS].n_value, &carpstat, sizeof(carpstat)) == 0)
 		return (NULL);
 
 	switch(vp->magic) {

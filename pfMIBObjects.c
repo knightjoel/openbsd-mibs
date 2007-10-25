@@ -210,7 +210,7 @@ struct variable4 pfMIBObjects_variables[] = {
 void init_pfMIBObjects(void) {
 	extern kvm_t *kd;
 
-	if (kvm_nlist(kd, nl)) {
+	if (kvm_nlist(kd, pf_nl)) {
 		snmp_log(LOG_ERR, "init_pfMIBObjects: no namelist\n");
 		return;
 	}
@@ -550,9 +550,9 @@ var_pfsync_stats(struct variable *vp, oid *name, size_t *length, int exact,
 			== MATCH_FAILED)
 		return (NULL);
 
-	if (nl[_PFSYNCSTATS].n_value == 0)
+	if (pf_nl[_PFSYNCSTATS].n_value == 0)
 		return (NULL);
-	if (klookup(nl[_PFSYNCSTATS].n_value, &pfsyncstat, sizeof(pfsyncstat)) == 0)
+	if (klookup(pf_nl[_PFSYNCSTATS].n_value, &pfsyncstat, sizeof(pfsyncstat)) == 0)
 		return (NULL);
 
 	switch(vp->magic) {
