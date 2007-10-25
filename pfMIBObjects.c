@@ -964,7 +964,7 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 		}
 
 		if (pr.rule.label[0])
-			if (nr == index)
+			if (nr == (index-1)) /* nr starts at 0 */
 				break;
 	}
 	
