@@ -1228,6 +1228,27 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 	PFRB_FOREACH(ts, &bt) {
 		if (!(ts->pfrts_flags & PFR_TFLAG_ACTIVE))
 			continue;
+		if (ts->pfrts_cnt == 0) {
+			op = cur_oid + 12;
+			*op++ = table_index;
+			result = snmp_oid_compare(name, *length, cur_oid, 12);
+			if (exact) {	/* GET */
+			       if (result == 0) {
+				       	/* this is the table that was requested but
+					 * it's empty */
+					free(bt.pfrb_caddr);
+					free(ba.pfrb_caddr);
+					return (NULL);
+				} else {
+					table_index++;
+					continue;
+				}
+			} else if (!exact) { /* GET-NEXT */
+				table_index++;
+				continue;
+			}
+		}
+
 		bzero(&filter, sizeof(struct pfr_table));
 		if (strlcpy(filter.pfrt_name, ts->pfrts_t.pfrt_name, 
 				sizeof(filter.pfrt_name)) 
