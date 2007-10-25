@@ -64,11 +64,7 @@ struct carpif {
 	struct carpreq carpr;
 };
 
-struct nlist carp_nl[] = {
-	{ "_carpstats" },
-#define _CARPSTATS 0
-	{ "" }
-};
+extern struct nlist nl[];
 
 
 void		 init_carpMIBObjects(void);

@@ -184,9 +184,11 @@ enum { PASS, BLOCK };
 
 enum { PFRB_TSTATS = 1, PFRB_ASTATS, PFRB_IFACES, PFRB_MAX };
 
-struct nlist pf_nl[] = {
+struct nlist nl[] = {
+	{ "_carpstats" },
+#define _CARPSTATS 0
 	{ "_pfsyncstats" },
-#define _PFSYNCSTATS 0 
+#define _PFSYNCSTATS 1
 	{ "" }
 };
 
