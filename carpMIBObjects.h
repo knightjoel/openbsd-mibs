@@ -64,8 +64,6 @@ struct carpif {
 	struct carpreq carpr;
 };
 
-extern struct nlist nl[];
-
 
 void		 init_carpMIBObjects(void);
 int		 carpif_count(void);
