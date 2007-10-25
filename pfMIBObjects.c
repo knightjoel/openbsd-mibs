@@ -934,12 +934,13 @@ unsigned char *
 var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
-	u_long nr, mnr;
+	u_long nr, mnr, lnr;
 	struct pfioc_rule pr;
 	static struct counter64 c64;
 	static u_long ulong_ret;
 	static char lname[PF_RULE_LABEL_SIZE];
 	int index;
+	int got_match = 0;
 
 	if (dev == -1)
 		return (NULL);
@@ -961,6 +962,7 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 	}
 
 	mnr = pr.nr;
+	lnr = 0;
 	for (nr = 0; nr < mnr; ++nr) {
 		pr.nr = nr;
 		if (ioctl(dev, DIOCGETRULE, &pr)) {
@@ -969,10 +971,17 @@ var_labels_table(struct variable *vp, oid *name, size_t *length, int exact,
 			return (NULL);
 		}
 
-		if (pr.rule.label[0])
-			if (nr == (index-1)) /* nr starts at 0 */
+		if (pr.rule.label[0]) {
+			lnr++;
+			if (lnr == index) {
+				got_match++;
 				break;
+			}
+		}
 	}
+
+	if (!got_match)
+		return (NULL);
 	
 	switch (vp->magic) {
 		case PF_LAINDEX:
