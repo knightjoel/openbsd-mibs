@@ -51,6 +51,7 @@
 #define CARP_IPSENT		231
 #define CARP_IP6SENT		232
 #define CARP_NOMEM		233
+#define CARP_PREEMPT		234
 
 config_require(util_funcs)
 

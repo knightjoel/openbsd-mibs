@@ -34,7 +34,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 carpMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "200708300000Z"
+    LAST-UPDATED "200801260000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -306,6 +306,15 @@ carpNoMemory OBJECT-TYPE
 	"Number of CARP advertisements that failed because memory
 	could not be allocated."
 	::= { carpStats 14 }
+
+carpTransitionsToMaster OBJECT-TYPE
+	SYNTAX		Counter64
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of times the host has transitioned to MASTER state
+	for any CARP group."
+	::= { carpStats 15 }
 
 
 -- END:  Don't forget this!

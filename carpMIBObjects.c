@@ -74,6 +74,7 @@ struct variable4 carpMIBObjects_variables[] = {
   { CARP_IPSENT		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,12 } },
   { CARP_IP6SENT	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,13 } },
   { CARP_NOMEM		, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,14 } },
+  { CARP_PREEMPT	, ASN_COUNTER64	, RONLY , var_carp_stats,   2, { 3,15 } },
 };
 
 
@@ -237,6 +238,10 @@ var_carp_stats(struct variable *vp, oid *name, size_t *length, int exact,
 		case CARP_NOMEM:
 			c64.high = carpstat.carps_onomem >> 32;
 			c64.low = carpstat.carps_onomem & 0xffffffff;
+			break;
+		case CARP_PREEMPT:
+			c64.high = carpstat.carps_preempt >> 32;
+			c64.low = carpstat.carps_preempt & 0xffffffff;
 			break;
 		default:
 			snmp_log(LOG_ERR,
