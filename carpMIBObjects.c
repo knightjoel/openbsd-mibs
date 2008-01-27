@@ -139,7 +139,7 @@ var_carpif_table(struct variable *vp, oid *name, size_t *length, int exact,
 			ulong_ret = name[*length-1];
 			return (unsigned char *) &ulong_ret;
 		case CARPIF_DESCR:
-			*var_len = strlcpy(ifname, carp.ifa.ifa_name, 
+			*var_len = strlcpy(ifname, carp.ifname, 
 						sizeof(ifname));
 			return (unsigned char *) ifname;
 		case CARPIF_VHID:
@@ -339,8 +339,7 @@ carpif_get(int index, struct carpif *carp)
 		return (-1);
 	}
 
-	memcpy(&carp->ifa, ifa, sizeof(struct ifaddrs));
-	carp->ifa.ifa_next = NULL;
+	strlcpy(carp->ifname, ifa->ifa_name, sizeof(carp->ifname));
 	memcpy(&carp->carpr, &carpr, sizeof(struct carpreq));
 
 	close(s);

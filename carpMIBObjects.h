@@ -60,7 +60,7 @@ FindVarMethod var_carp_stats;
 FindVarMethod var_carp_sysctl;
 
 struct carpif {
-	struct ifaddrs ifa;
+	char ifname[IFNAMSIZ];
 	struct carpreq carpr;
 };
 
