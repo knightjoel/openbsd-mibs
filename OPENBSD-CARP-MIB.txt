@@ -34,7 +34,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 carpMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "200801260000Z"
+    LAST-UPDATED "2008005050000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -78,14 +78,6 @@ carpLog OBJECT-TYPE
 	DESCRIPTION
 	"Indicates whether logging of invalud CARP packets is enabled."
 	::= { carpSysctl 3 }
-
-carpArpbalance OBJECT-TYPE
-	SYNTAX      TruthValue
-	MAX-ACCESS  read-only
-	STATUS      current
-	DESCRIPTION
-	"Indicates whether load balancing is enabled."
-	::= { carpSysctl 4 }
 
 
 -- carpIf

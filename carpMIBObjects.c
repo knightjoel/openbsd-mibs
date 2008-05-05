@@ -271,7 +271,6 @@ var_carp_sysctl(struct variable *vp, oid *name, size_t *length, int exact,
 		case CARP_SYSCTL1:
 		case CARP_SYSCTL2:
 		case CARP_SYSCTL3:
-		case CARP_SYSCTL4:
 			if ((v = carp_sysctl_get(index)) == -1)
 				return (NULL);
 			ulong_ret = v ? 1 : 2;   /* truthvalue */
