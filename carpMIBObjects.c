@@ -130,7 +130,7 @@ var_carpif_table(struct variable *vp, oid *name, size_t *length, int exact,
 						sizeof(ifname));
 			return (unsigned char *) ifname;
 		case CARPIF_VHID:
-			ulong_ret = carp.carpr.carpr_vhid;
+			ulong_ret = carp.carpr.carpr_vhids[0];
 			return (unsigned char *) &ulong_ret;
 		case CARPIF_DEV:
 			*var_len = strlcpy(ifname, carp.carpr.carpr_carpdev,
@@ -140,7 +140,7 @@ var_carpif_table(struct variable *vp, oid *name, size_t *length, int exact,
 			ulong_ret = carp.carpr.carpr_advbase;
 			return (unsigned char *) &ulong_ret;
 		case CARPIF_ADVSKEW:
-			ulong_ret = carp.carpr.carpr_advskew;
+			ulong_ret = carp.carpr.carpr_advskews[0];
 			return (unsigned char *) &ulong_ret;
 		case CARPIF_STATE:
 			ulong_ret = carp.carpr.carpr_state;
