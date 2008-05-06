@@ -1053,7 +1053,7 @@ var_tables_table(struct variable *vp, oid *name, size_t *length, int exact,
 	if (dev == -1)
 		return (NULL);
 	
-	if (pft_get(&b) || b.pfrb_size == 0) {
+	if (pft_get(&b)) {
 		snmp_log(LOG_ERR,
 			"var_tables_table: can't get list of pf tables\n");
 		return (NULL);
@@ -1219,11 +1219,14 @@ var_tbl_addr_table(struct variable *vp, oid *name, size_t *length, int exact,
 	if (dev == -1)
 		return (NULL);
 
-	if (pft_get(&bt) || bt.pfrb_size == 0) {
+	if (pft_get(&bt)) {
 		snmp_log(LOG_ERR,
 			"var_tbl_addr_table: can't get list of pf tables\n");
 		return (NULL);
 	}
+	/* no tables exist */
+	if (bt.pfrb_size == 0)
+		return (NULL);
 
 	memcpy((char *)cur_oid, (char *)vp->name, (int)(vp->namelen) * sizeof(oid));
 
