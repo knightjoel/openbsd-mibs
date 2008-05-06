@@ -28,7 +28,6 @@
 #include <netinet/in.h>
 #include <netinet/ip_carp.h>
 
-#include <kvm.h>
 #include <errno.h>
 
 #include <net-snmp/net-snmp-config.h>
@@ -37,12 +36,6 @@
 
 #include "carpMIBObjects.h"
 
-
-struct nlist carp_nl[] = {
-       { "_carpstats" },
-#define _CARPSTATS  0
-       { NULL }
-};
 
 oid carpMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,3 };
 
@@ -79,13 +72,6 @@ struct variable4 carpMIBObjects_variables[] = {
 
 
 void init_carpMIBObjects(void) {
-	extern kvm_t *kd;
-
-	if (kvm_nlist(kd, carp_nl)) {
-		snmp_log(LOG_ERR, "init_carpMIBObjects: no namelist\n");
-		return;
-	}
-
 	REGISTER_MIB("carpMIBObjects", carpMIBObjects_variables, variable4,
 			carpMIBObjects_variables_oid);
 }
@@ -170,6 +156,8 @@ unsigned char *
 var_carp_stats(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
+	int mib[4] = { CTL_NET, AF_INET, IPPROTO_CARP, CARPCTL_STATS };
+	size_t len;
 	struct carpstats carpstat;
 	static struct counter64 c64;
 
@@ -177,10 +165,12 @@ var_carp_stats(struct variable *vp, oid *name, size_t *length, int exact,
 			== MATCH_FAILED)
 		return (NULL);
 
-	if (carp_nl[_CARPSTATS].n_value == 0)
+	len = sizeof(carpstat);
+	if (sysctl(mib, 4, &carpstat, &len, NULL, 0) == -1) {
+		snmp_log(LOG_ERR, "var_carp_stats: sysctl: %s\n",
+			strerror(errno));
 		return (NULL);
-	if (klookup(carp_nl[_CARPSTATS].n_value, &carpstat, sizeof(carpstat)) == 0)
-		return (NULL);
+	}
 
 	switch(vp->magic) {
 		case CARP_IPRECV:

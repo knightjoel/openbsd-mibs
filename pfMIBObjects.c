@@ -19,9 +19,11 @@
 
 
 #include <sys/ioctl.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/sysctl.h>
 #include <netinet/in.h>
 #include <net/if.h>
 #include <net/pfvar.h>
@@ -55,12 +57,6 @@ size_t buf_esize[PFRB_MAX] = { 0,
 	sizeof(struct pfr_tstats), 
 	sizeof(struct pfr_astats),
 	sizeof(struct pfi_kif)
-};
-
-struct nlist pf_nl[] = {
-       { "_pfsyncstats" },
-#define _PFSYNCSTATS  0
-       { NULL }
 };
 
 oid pfMIBObjects_variables_oid[] = { 1,3,6,1,4,1,64512,1 };
@@ -214,13 +210,6 @@ struct variable4 pfMIBObjects_variables[] = {
 
 
 void init_pfMIBObjects(void) {
-	extern kvm_t *kd;
-
-	if (kvm_nlist(kd, pf_nl)) {
-		snmp_log(LOG_ERR, "init_pfMIBObjects: no namelist\n");
-		return;
-	}
-
 	REGISTER_MIB("pfMIBObjects", pfMIBObjects_variables, variable4,
 			pfMIBObjects_variables_oid);
 
@@ -549,6 +538,8 @@ unsigned char *
 var_pfsync_stats(struct variable *vp, oid *name, size_t *length, int exact,
 		size_t *var_len, WriteMethod **write_method)
 {
+	int mib[4] = { CTL_NET, AF_INET, IPPROTO_PFSYNC, PFSYNCCTL_STATS };
+	size_t len;
 	struct pfsyncstats pfsyncstat;
 	static struct counter64 c64;
 
@@ -556,10 +547,12 @@ var_pfsync_stats(struct variable *vp, oid *name, size_t *length, int exact,
 			== MATCH_FAILED)
 		return (NULL);
 
-	if (pf_nl[_PFSYNCSTATS].n_value == 0)
+	len = sizeof(pfsyncstat);
+	if (sysctl(mib, 4, &pfsyncstat, &len, NULL, 0) == -1) {
+		snmp_log(LOG_ERR, "var_pfsync_stats: sysctl: %s\n",
+			strerror(errno));
 		return (NULL);
-	if (klookup(pf_nl[_PFSYNCSTATS].n_value, &pfsyncstat, sizeof(pfsyncstat)) == 0)
-		return (NULL);
+	}
 
 	switch(vp->magic) {
 		case PFSYNC_IPRECV:
