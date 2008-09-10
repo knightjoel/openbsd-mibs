@@ -143,7 +143,7 @@ var_carpif_table(struct variable *vp, oid *name, size_t *length, int exact,
 			ulong_ret = carp.carpr.carpr_advskews[0];
 			return (unsigned char *) &ulong_ret;
 		case CARPIF_STATE:
-			ulong_ret = carp.carpr.carpr_state[0];
+			ulong_ret = carp.carpr.carpr_states[0];
 			return (unsigned char *) &ulong_ret;
 		default:
 			return (NULL);
