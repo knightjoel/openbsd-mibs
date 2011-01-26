@@ -167,9 +167,13 @@ sensor_refresh(void)
 
 	num_sensors = 0;
 
-	for (i = 0; i < MAXSENSORDEVICES; i++) {
+	for (i = 0; ; i++) {
 		mib[2] = i;
 		if (sysctl(mib, 3, &sdev, &len, NULL, 0) == -1) {
+			if (errno == ENXIO)
+				continue;
+			if (errno == ENOENT)
+				break;
 			if (errno != ENOENT)
 				snmp_log(LOG_DEBUG,
 					"sensor_refresh: sysctl: %s\n",
