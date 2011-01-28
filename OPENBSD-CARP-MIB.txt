@@ -2,7 +2,7 @@
 -- $jwk$
 --
 --
--- Copyright (c) 2006-2007 Joel Knight <enabled@myrealbox.com>
+-- Copyright (c) 2006-2008 Joel Knight <knight.joel@gmail.com>
 -- 
 -- Permission to use, copy, modify, and distribute this document for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,7 @@ carpMIBObjects MODULE-IDENTITY
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
-                  email:      enabled@myrealbox.com
+                  email:      knight.joel@gmail.com
                   www:        www.packetmischief.ca/openbsd/snmp/
                  "
     DESCRIPTION "The MIB module for gathering information about
