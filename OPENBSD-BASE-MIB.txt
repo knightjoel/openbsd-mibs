@@ -32,7 +32,7 @@ openBSD MODULE-IDENTITY
     CONTACT-INFO "
                   Author:     Joel Knight
                   email:      knight.joel@gmail.com
-                  www:        www.packetmischief.ca/openbsd/snmp/
+                  www:        www.packetmischief.ca/openbsd-snmp-mibs/
                  "
     DESCRIPTION "The base MIB module for the OpenBSD project."
 -- FIXME: http://www.iana.org/assignments/smi-numbers

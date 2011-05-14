@@ -39,7 +39,7 @@ carpMIBObjects MODULE-IDENTITY
     CONTACT-INFO "
                   Author:     Joel Knight
                   email:      knight.joel@gmail.com
-                  www:        www.packetmischief.ca/openbsd/snmp/
+                  www:        www.packetmischief.ca/openbsd-snmp-mibs/
                  "
     DESCRIPTION "The MIB module for gathering information about
 		Common Address Redundancy Protocol (CARP) interfaces.
