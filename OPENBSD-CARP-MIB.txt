@@ -2,7 +2,7 @@
 -- $jwk$
 --
 --
--- Copyright (c) 2006-2008 Joel Knight <knight.joel@gmail.com>
+-- Copyright (c) 2006-2011 Joel Knight <knight.joel@gmail.com>
 -- 
 -- Permission to use, copy, modify, and distribute this document for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@ OPENBSD-CARP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
 	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, 
-	Integer32, Integer32, enterprises
+	Counter64, Integer32, Integer32, enterprises
 		FROM SNMPv2-SMI
 
 	TruthValue
@@ -34,7 +34,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 carpMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "200805050000Z"
+    LAST-UPDATED "201105130000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight

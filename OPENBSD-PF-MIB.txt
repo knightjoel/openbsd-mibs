@@ -1244,7 +1244,7 @@ LblEntry ::=
 		lblInPkts		Counter64,
 		lblInBytes		Counter64,
 		lblOutPkts		Counter64,
-		lblOutBytes		Counter64,
+		lblOutBytes		Counter64
 	}
 
 lblIndex OBJECT-TYPE
