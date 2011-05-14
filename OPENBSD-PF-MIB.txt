@@ -2,7 +2,7 @@
 -- $jwk$
 --
 --
--- Copyright (c) 2004-2007 Joel Knight <knight.joel@gmail.com>
+-- Copyright (c) 2004-2011 Joel Knight <knight.joel@gmail.com>
 -- 
 -- Permission to use, copy, modify, and distribute this document for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -35,7 +35,7 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 pfMIBObjects MODULE-IDENTITY
-    LAST-UPDATED "200605040000Z"
+    LAST-UPDATED "201105130000Z"
     ORGANIZATION "OpenBSD"
     CONTACT-INFO "
                   Author:     Joel Knight
@@ -85,7 +85,16 @@ runtime OBJECT-TYPE
     ::= { info 2 }
 
 debug OBJECT-TYPE
-    SYNTAX      INTEGER { none(0), urgent(1), misc(2), noisey(3) }
+    SYNTAX      INTEGER { 
+	emerg(0), 
+	alert(1), 
+	crit(2), 
+	err(3), 
+	warning(4), 
+	notice(5),
+	info(6),
+	debug(7)	
+    }
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
