@@ -21,7 +21,7 @@ OPENBSD-CARP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
 	MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, 
-	Counter64, Integer32, Integer32, enterprises
+	Counter64, Integer32, enterprises
 		FROM SNMPv2-SMI
 
 	TruthValue
