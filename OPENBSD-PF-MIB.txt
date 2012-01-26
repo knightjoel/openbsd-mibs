@@ -854,7 +854,7 @@ tblTable OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 	"A list of individual tables. The number of entries is
-	given by the value of tableNumber."
+	given by the value of tblNumber."
 	::= { tables 128 }
 
 tblEntry OBJECT-TYPE
@@ -1221,7 +1221,7 @@ lblTable OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 	"A list of individual labels. The number of entries is
-	given by the value of labelNumber."
+	given by the value of lblNumber."
 	::= { labels 128 }
 
 lblEntry OBJECT-TYPE
